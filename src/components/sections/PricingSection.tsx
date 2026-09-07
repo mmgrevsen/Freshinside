@@ -6,7 +6,17 @@ import { Reveal } from "@/components/ui/Reveal";
 import { CheckIcon } from "@/components/ui/icons";
 import { PackageSelectLink } from "@/components/sections/PackageSelectLink";
 
+// Gitteret tilpasser sig automatisk antallet af pakker i src/config/pricing.ts
+const gridByCount: Record<number, string> = {
+  1: "md:grid-cols-1 max-w-md",
+  2: "md:grid-cols-2 max-w-3xl",
+  3: "md:grid-cols-3",
+};
+
 export function PricingSection() {
+  const count = pricingPackages.length;
+  const gridClasses = gridByCount[count] ?? "md:grid-cols-3";
+
   return (
     <section id="priser" className="py-20 sm:py-28">
       <Container className="flex flex-col items-center gap-14">
@@ -14,11 +24,11 @@ export function PricingSection() {
           <SectionHeading
             eyebrow="Priser"
             title="Find den pakke, der passer til din bil"
-            description="Tre enkle pakker – vælg den, der matcher, hvor grundig en rengøring bilen har brug for."
+            description={`${count === 2 ? "To" : "Tre"} enkle pakker – vælg den, der matcher, hvor grundig en rengøring bilen har brug for.`}
           />
         </Reveal>
 
-        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
+        <div className={`grid w-full grid-cols-1 gap-6 ${gridClasses}`}>
           {pricingPackages.map((pkg, index) => (
             <Reveal
               key={pkg.id}

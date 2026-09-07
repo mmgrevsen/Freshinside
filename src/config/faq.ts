@@ -8,7 +8,7 @@ export const faqItems = [
   {
     question: "Hvor lang tid tager en rengøring?",
     answer:
-      "Det afhænger af pakken og bilens stand. Fresh Basic tager typisk 30–45 minutter, mens Fresh Deep kan tage 1,5–2 timer.",
+      "Det afhænger af pakken og bilens stand. Fresh Clean tager typisk 1–1,5 time, mens Fresh Deep kan tage 1,5–2 timer.",
   },
   {
     question: "Skal jeg selv flytte bilen?",
@@ -18,7 +18,7 @@ export const faqItems = [
   {
     question: "Kommer I hjem til mig?",
     answer:
-      "Ja. FreshInside kommer ud til dig inden for det aftalte område, så du slipper for besværet.",
+      "Ja. FreshInside kommer ud til dig inden for ca. 15 km. Bor du længere væk, kan du skrive og høre, om det alligevel kan lade sig gøre.",
   },
   {
     question: "Hvilke biler rengør I?",

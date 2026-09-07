@@ -15,5 +15,6 @@ export type BookingRequest = {
   phone: string;
   email: string;
   address: string;
+  postalCode: string;
   message: string;
 };

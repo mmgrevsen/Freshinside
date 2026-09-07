@@ -12,8 +12,8 @@ export const contactInfo = {
     href: "tel:+4500000000",
   },
   email: {
-    display: "kontakt@freshinside.dk",
-    href: "mailto:kontakt@freshinside.dk",
+    display: "mmgrevsen@gmail.com",
+    href: "mailto:mmgrevsen@gmail.com",
   },
   area: "Aalborg og omegn",
 } as const;

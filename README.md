@@ -33,6 +33,7 @@ Al indhold, du med stor sandsynlighed vil ændre, ligger samlet i mappen **`src/
 | Fil | Hvad du ændrer her |
 |---|---|
 | `src/config/pricing.ts` | Priser, pakkenavne, beskrivelser og hvad der er inkluderet i hver pakke |
+| `src/config/serviceArea.ts` | Hvor langt du kører ud (km), og hvem folk uden for området skal skrive til |
 | `src/config/contact.ts` | Telefonnummer, e-mail, område og åbningstider |
 | `src/config/site.ts` | Navn, slogan, "Sådan fungerer det", "Om FreshInside"-tekst, område-tekst og menu-links |
 | `src/config/testimonials.ts` | Kundeanmeldelser (husk at slå `isPlaceholder` fra, når det er en rigtig anmeldelse) |
@@ -47,33 +48,41 @@ Hver fil har kommentarer øverst, der forklarer, hvad du kan ændre. Du skal blo
 
 ```ts
 {
-  id: "fresh-basic",
-  name: "Fresh Basic",
-  price: 149,
+  id: "fresh-clean",
+  name: "Fresh Clean",
+  price: 219,
   ...
 }
 ```
 
-Ret `149` til den nye pris, og gem filen. Det er det!
+Ret `219` til den nye pris, og gem filen. Det er det!
+
+### Eksempel: Ændre hvor langt du kører ud
+
+Åbn `src/config/serviceArea.ts` og ret tallet:
+
+```ts
+maxDistanceKm: 15,
+```
+
+Kunder inden for den afstand kan booke direkte online. Ligger deres adresse længere væk, får de i stedet besked om at skrive til dig på den e-mail, der står i samme fil (`outOfAreaEmail`). Afstanden bliver regnet ud automatisk ud fra kundens adresse via Danmarks officielle adresseregister – du skal ikke opsætte noget.
 
 ---
 
 ## 3. Sådan ændrer du billeder
 
-Alle billeder ligger i mappen **`public/images/`**:
+Der er lige nu **ingen fotos** på hjemmesiden – de blev fjernet, indtil du har taget dine egne.
 
-- `public/images/hero-car-interior.svg` – det store billede øverst på forsiden
-- `public/images/before-after/` – før/efter-billederne (fem par: sæder, gulv, kopholdere, instrumentbræt, bagagerum)
+Billedet øverst på forsiden er i stedet en **tegnet illustration** (en bilkabine), som ligger i `src/components/ui/HeroScene.tsx`. Den er tegnet i kode, så den loader lynhurtigt og altid er skarp.
 
-Billederne, der ligger der nu, er **tegnede eksempel-billeder** (placeholders), så du kan se, hvordan hjemmesiden ser ud, før du har dine egne fotos.
+**Når du har taget dine egne billeder:**
 
-**Sådan skifter du til dine egne billeder:**
+1. Lav mappen `public/images/` og læg dine billeder derind, f.eks. `public/images/hero.jpg`.
+2. Bed mig om at skifte illustrationen ud med dit foto – eller erstat `<HeroScene />` i `src/components/sections/Hero.tsx` med et `<Image>`-tag.
 
-1. Tag et billede (f.eks. med din telefon) og læg filen i den rigtige mappe, f.eks. `public/images/before-after/saeder-foer.jpg`.
-2. Åbn `src/config/gallery.ts` og ret filstien, så den passer til dit nye filnavn.
-3. Gem – hjemmesiden opdateres automatisk.
+**Før/efter-sektionen** er midlertidigt slået fra (den er kun interessant med rigtige billeder). Filerne ligger der stadig: `src/components/sections/BeforeAfterSection.tsx` og `src/config/gallery.ts`. Du sætter den tilbage ved at fjerne `//` foran de to linjer i `src/app/page.tsx`.
 
-Du kan sagtens bruge `.jpg` eller `.png` i stedet for `.svg` – det virker present som det samme.
+**Delebillede:** Når du deler linket på Snapchat, Instagram eller SMS, laves der automatisk et flot forhåndsvisnings-billede. Det styres af `src/app/opengraph-image.tsx` – du behøver ikke uploade noget.
 
 ---
 
@@ -141,15 +150,38 @@ Får du senere dit eget domæne (f.eks. freshinside.dk), kan du tilføje det und
 
 ---
 
-## 8. Om booking-systemet
+## 8. Få besked når nogen booker (e-mail)
 
-Booking-formularen virker allerede i dag: en besøgende kan udfylde og sende en forespørgsel, og den bliver sendt til `src/app/api/booking/route.ts`, som lige nu skriver den til serverens log og bekræfter overfor kunden, at den er modtaget.
+Booking-formularen virker, men for at du får en **e-mail** hver gang nogen booker, skal du lave en gratis engangsopsætning (ca. 5 minutter):
 
-Der er **endnu ikke** en rigtig database, så bookinger bliver ikke gemt permanent nogen steder endnu. Filen `src/app/api/booking/route.ts` har en guide øverst i kommentarerne til, hvordan du (eller jeg, næste gang du beder om hjælp) kan koble en rigtig database på, f.eks. [Supabase](https://supabase.com), så bookinger bliver gemt, og du kan få en notifikation, når der kommer en ny.
+1. Opret en gratis konto på [resend.com](https://resend.com) — brug den e-mail, du vil modtage bookinger på (`mmgrevsen@gmail.com`).
+2. Gå til **API Keys** i menuen, og klik **Create API Key**. Kopiér nøglen (starter med `re_`).
+3. Gå til dit projekt på [vercel.com](https://vercel.com) → **Settings → Environment Variables**.
+4. Opret en variabel:
+   - Name: `RESEND_API_KEY`
+   - Value: nøglen du kopierede
+5. Klik **Save**, gå til **Deployments**, klik **⋯** ved den nyeste og vælg **Redeploy**.
+
+Derefter får du en mail med kundens navn, telefon, adresse, valgte pakke og ønsket tidspunkt, hver gang nogen booker.
+
+**Indtil du har sat det op:** bookinger går ikke tabt — de bliver skrevet i loggen på Vercel. Du finder dem under dit projekt → **Logs**. Men det er nemmest at få dem på mail, så det anbefales at sætte det op.
+
+## 9. Om booking-systemet
+
+Sådan fungerer en booking i dag:
+
+1. Kunden udfylder formularen på forsiden.
+2. Adressen slås op i Danmarks officielle adresseregister, og afstanden til dig regnes ud.
+3. Er kunden **inden for** dit område (se `src/config/serviceArea.ts`), sendes forespørgslen afsted, og du får en e-mail (når du har sat det op – se afsnit 8).
+4. Er kunden **uden for** området, kan der ikke bookes direkte. I stedet vises en besked med en knap, der åbner en mail til dig, så I kan aftale det.
+
+Afstanden bliver også tjekket på serveren, så området ikke kan omgås ved at pille ved siden i browseren.
+
+Der er **endnu ikke** en database, så bookinger gemmes ikke i en liste, du kan bladre i – de kommer kun på mail. Vil du senere have en rigtig oversigt over alle bookinger, kan der kobles en database på (f.eks. [Supabase](https://supabase.com)); der ligger en guide øverst i `src/app/api/booking/route.ts`.
 
 ---
 
-## 9. Projektstruktur (kort overblik)
+## 10. Projektstruktur (kort overblik)
 
 ```
 src/
@@ -167,7 +199,7 @@ public/
 
 ---
 
-## 10. Teknologi
+## 11. Teknologi
 
 Hjemmesiden er bygget med:
 

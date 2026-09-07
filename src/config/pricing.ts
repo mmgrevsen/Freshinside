@@ -7,6 +7,9 @@
  *
  * "popular: true" sætter mærkatet "Mest populær" på en pakke.
  * Der må kun være ÉN pakke med popular: true ad gangen.
+ *
+ * Vil du tilføje en tredje pakke igen, kopierer du blot en hel blok
+ * { ... } og retter id, navn, pris og punkter.
  */
 
 export type PricingPackage = {
@@ -22,32 +25,18 @@ export type PricingPackage = {
 
 export const pricingPackages: PricingPackage[] = [
   {
-    id: "fresh-basic",
-    name: "Fresh Basic",
-    price: 149,
+    id: "fresh-clean",
+    name: "Fresh Clean",
+    price: 219,
     priceSuffix: "kr.",
-    description: "Den hurtige opfriskning til bilen, der trænger til en let hånd.",
+    description: "Grundig rengøring af hele kabinen – den mest valgte pakke.",
     features: [
       "Grundig støvsugning",
       "Rengøring af måtter",
       "Aftørring af instrumentbræt",
+      "Rengøring af plastoverflader",
+      "Kopholdere og dørpaneler",
       "Tømning af affald",
-      "Let rengøring af overflader",
-    ],
-    ctaLabel: "Vælg denne pakke",
-  },
-  {
-    id: "fresh-clean",
-    name: "Fresh Clean",
-    price: 249,
-    priceSuffix: "kr.",
-    description: "Den mest valgte pakke – grundig rengøring af hele kabinen.",
-    features: [
-      "Alt fra Fresh Basic",
-      "Grundig rengøring af plastoverflader",
-      "Kopholdere",
-      "Dørpaneler",
-      "Indvendige ruder",
       "Bagagerum",
     ],
     popular: true,
@@ -56,7 +45,7 @@ export const pricingPackages: PricingPackage[] = [
   {
     id: "fresh-deep",
     name: "Fresh Deep",
-    price: 399,
+    price: 319,
     priceSuffix: "kr.",
     description: "Den grundige totalrengøring til bilen, der fortjener ekstra fokus.",
     features: [
