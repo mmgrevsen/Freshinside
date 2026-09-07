@@ -18,5 +18,9 @@ export type BookingRequest = {
   postalCode: string;
   /** DAWA's id for den valgte adresse – bruges til at tjekke afstanden på serveren */
   addressId: string;
+  /** Id'er på valgte ekstra services fra src/config/addons.ts */
+  addOnIds: string[];
+  /** Samlet pris i kroner (pakke + ekstra services) */
+  totalPrice: number;
   message: string;
 };

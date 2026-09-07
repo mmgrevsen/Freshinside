@@ -2,7 +2,7 @@
 
 import { bookingAnchor } from "@/config/site";
 import { Button } from "@/components/ui/Button";
-import { SELECTED_PACKAGE_STORAGE_KEY } from "@/lib/constants";
+import { selectForBooking } from "@/lib/bookingSelection";
 
 export function PackageSelectLink({
   packageId,
@@ -19,13 +19,7 @@ export function PackageSelectLink({
       href={bookingAnchor}
       variant={variant}
       className="w-full"
-      onClick={() => {
-        try {
-          window.sessionStorage.setItem(SELECTED_PACKAGE_STORAGE_KEY, packageId);
-        } catch {
-          // sessionStorage kan være utilgængelig (f.eks. privat browsing) – ikke kritisk.
-        }
-      }}
+      onClick={() => selectForBooking({ packageId, addOnIds: [] })}
     >
       {label}
     </Button>

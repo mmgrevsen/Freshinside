@@ -63,6 +63,20 @@ export const navLinks = [
 export const bookingAnchor = "#booking";
 
 /**
+ * TRUST-BAR
+ * ------------------------------------------------
+ * De korte punkter lige under hero-sektionen.
+ * VIGTIGT: Skriv kun ting, der rent faktisk passer – det er dem, der
+ * skaber tillid. Fjern et punkt ved at slette linjen.
+ */
+export const trustPoints = [
+  "Lokal service i Aalborg og omegn",
+  "Vi kommer til dig",
+  "Nem booking online",
+  "Personlig service",
+] as const;
+
+/**
  * TEKSTER TIL "SÅDAN FUNGERER DET"
  */
 export const howItWorksSteps = [
@@ -79,6 +93,18 @@ export const howItWorksSteps = [
     description:
       "Bilen bliver rengjort indvendigt, så den føles ren og frisk igen.",
   },
+] as const;
+
+/**
+ * "INDEN VI KOMMER"
+ * ------------------------------------------------
+ * Vises til kunden, når bookingen er sendt. Det sparer tid på dagen.
+ */
+export const beforeVisitSteps = [
+  "Fjern personlige værdigenstande fra bilen",
+  "Tøm bilen for større ting og affald",
+  "Fortæl om særlige pletter eller steder, der skal have ekstra fokus",
+  "Sørg for, at bilen holder et sted med plads til at arbejde omkring den",
 ] as const;
 
 /**

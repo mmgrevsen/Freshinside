@@ -17,6 +17,8 @@ export type PricingPackage = {
   name: string;
   price: number;
   priceSuffix: string;
+  /** Cirka hvor lang tid pakken tager – vises på pakkekortet */
+  duration: string;
   description: string;
   features: string[];
   popular?: boolean;
@@ -29,6 +31,7 @@ export const pricingPackages: PricingPackage[] = [
     name: "Fresh Clean",
     price: 219,
     priceSuffix: "kr.",
+    duration: "Ca. 1–1,5 time",
     description: "Grundig rengøring af hele kabinen – den mest valgte pakke.",
     features: [
       "Grundig støvsugning",
@@ -47,6 +50,7 @@ export const pricingPackages: PricingPackage[] = [
     name: "Fresh Deep",
     price: 319,
     priceSuffix: "kr.",
+    duration: "Ca. 2–3 timer",
     description: "Den grundige totalrengøring til bilen, der fortjener ekstra fokus.",
     features: [
       "Alt fra Fresh Clean",

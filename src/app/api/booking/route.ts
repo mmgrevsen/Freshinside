@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { pricingPackages } from "@/config/pricing";
+import { addOns } from "@/config/addons";
 import { serviceAreaConfig } from "@/config/serviceArea";
 import { checkServiceAreaByText, measureDistanceToCustomer } from "@/lib/distance";
 import { addressById } from "@/lib/dawa";
@@ -27,13 +28,31 @@ import type { BookingRequest } from "@/types/booking";
 
 const BOOKING_EMAIL = serviceAreaConfig.outOfAreaEmail;
 
+/** Prisen regnes ud her, så et manipuleret beløb fra browseren ikke kan snyde. */
+function calculateTotal(booking: BookingRequest) {
+  const chosenPackage = pricingPackages.find((pkg) => pkg.id === booking.packageId);
+  const addOnTotal = addOns
+    .filter((addOn) => booking.addOnIds?.includes(addOn.id))
+    .reduce((sum, addOn) => sum + addOn.price, 0);
+
+  return (chosenPackage?.price ?? 0) + addOnTotal;
+}
+
 function formatBookingEmail(booking: BookingRequest, distanceKm: number | null) {
   const chosenPackage = pricingPackages.find((pkg) => pkg.id === booking.packageId);
+
+  const chosenAddOns = addOns.filter((addOn) =>
+    booking.addOnIds?.includes(addOn.id)
+  );
 
   return [
     "Ny bookingforespørgsel fra FreshInside.dk",
     "",
     `Pakke:     ${chosenPackage ? `${chosenPackage.name} (${chosenPackage.price} ${chosenPackage.priceSuffix})` : booking.packageId}`,
+    chosenAddOns.length > 0
+      ? `Ekstra:    ${chosenAddOns.map((a) => `${a.name} (+${a.price} kr.)`).join(", ")}`
+      : "Ekstra:    ingen",
+    `I alt:     ${calculateTotal(booking)} kr.`,
     `Dato:      ${booking.date}`,
     `Tidspunkt: ${booking.time}`,
     "",

@@ -38,6 +38,8 @@ Al indhold, du med stor sandsynlighed vil ændre, ligger samlet i mappen **`src/
 | `src/config/site.ts` | Navn, slogan, "Sådan fungerer det", "Om FreshInside"-tekst, område-tekst og menu-links |
 | `src/config/testimonials.ts` | Kundeanmeldelser (husk at slå `isPlaceholder` fra, når det er en rigtig anmeldelse) |
 | `src/config/faq.ts` | Spørgsmål og svar i FAQ-sektionen |
+| `src/config/addons.ts` | Ekstra services, kunden kan tilvælge under booking, og hvad de koster |
+| `src/config/quiz.ts` | Spørgsmålene i "Hvilken pakke passer til mig?"-quizzen |
 | `src/config/gallery.ts` | Hvilke billeder der bruges i hero-sektionen og før/efter-sektionen |
 
 Hver fil har kommentarer øverst, der forklarer, hvad du kan ændre. Du skal blot rette teksten/tallet mellem anførselstegnene og gemme filen.
@@ -97,7 +99,7 @@ Billedet øverst på forsiden er i stedet en **tegnet illustration** (en bilkabi
 ## 4. Sådan ændrer du tekst
 
 - Overskrifter, undertekster og knap-tekster i **hero-sektionen** ligger i `src/components/sections/Hero.tsx`.
-- De fleste andre tekster (om os, sådan-fungerer-det, område) ligger i `src/config/site.ts`.
+- De fleste andre tekster (om os, sådan-fungerer-det, område, trust-bar og "inden vi kommer") ligger i `src/config/site.ts`.
 - Har du brug for at ændre en tekst, du ikke kan finde i `src/config/`, så spørg endelig, hvor den ligger.
 
 ---

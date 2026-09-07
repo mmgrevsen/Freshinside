@@ -3,7 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Badge } from "@/components/ui/Badge";
 import { Reveal } from "@/components/ui/Reveal";
-import { CheckIcon } from "@/components/ui/icons";
+import { CheckIcon, ClockIcon } from "@/components/ui/icons";
 import { PackageSelectLink } from "@/components/sections/PackageSelectLink";
 
 // Gitteret tilpasser sig automatisk antallet af pakker i src/config/pricing.ts
@@ -60,14 +60,20 @@ export function PricingSection() {
                   <p className="mt-1 text-sm text-ink-soft">{pkg.description}</p>
                 </div>
 
-                <p className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold tracking-tight text-ink">
-                    {pkg.price}
-                  </span>
-                  <span className="text-sm font-medium text-ink-soft">
-                    {pkg.priceSuffix}
-                  </span>
-                </p>
+                <div>
+                  <p className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold tracking-tight text-ink">
+                      {pkg.price}
+                    </span>
+                    <span className="text-sm font-medium text-ink-soft">
+                      {pkg.priceSuffix}
+                    </span>
+                  </p>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-ink-soft">
+                    <ClockIcon className="h-4 w-4 text-brand-500" />
+                    {pkg.duration}
+                  </p>
+                </div>
 
                 <ul className="flex flex-1 flex-col gap-3">
                   {pkg.features.map((feature) => (
