@@ -18,7 +18,7 @@ export const faqItems = [
   {
     question: "Kommer I hjem til mig?",
     answer:
-      "Ja. FreshInside kommer ud til dig inden for ca. 15 km. Bor du længere væk, kan du skrive og høre, om det alligevel kan lade sig gøre.",
+      "Ja. FreshInside kommer ud til dig inden for ca. 15 km på cykel. Når du vælger din adresse i bookingformularen, kan du med det samme se, om du er inden for området.",
   },
   {
     question: "Hvilke biler rengør I?",

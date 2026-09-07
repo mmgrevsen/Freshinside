@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { pricingPackages } from "@/config/pricing";
 import { serviceAreaConfig } from "@/config/serviceArea";
-import { distanceInKm } from "@/lib/distance";
+import { measureDistanceToCustomer, type AreaCheck } from "@/lib/distance";
 import type { DawaAddress } from "@/lib/dawa";
 import { Button } from "@/components/ui/Button";
 import { AddressAutocomplete } from "@/components/ui/AddressAutocomplete";
@@ -42,6 +42,9 @@ export function BookingForm() {
   const [contact, setContact] = useState<ContactFields>(emptyContact);
   const [addressText, setAddressText] = useState("");
   const [selectedAddress, setSelectedAddress] = useState<DawaAddress | null>(null);
+  const [areaCheck, setAreaCheck] = useState<(AreaCheck & { addressId: string }) | null>(
+    null
+  );
   const [showMap, setShowMap] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -66,18 +69,33 @@ export function BookingForm() {
     setShowMap(false);
   }, []);
 
-  // Adressen har præcise koordinater med, så afstanden kan regnes ud med det samme.
-  const distanceKm = selectedAddress
-    ? Math.round(
-        distanceInKm(
-          [serviceAreaConfig.centerLongitude, serviceAreaConfig.centerLatitude],
-          [selectedAddress.longitude, selectedAddress.latitude]
-        ) * 10
-      ) / 10
-    : null;
+  // Henter den rigtige cykelrute-afstand, når kunden har valgt en adresse.
+  useEffect(() => {
+    if (!selectedAddress) return;
 
-  const isInsideArea = distanceKm !== null && distanceKm <= serviceAreaConfig.maxDistanceKm;
-  const isOutsideArea = distanceKm !== null && !isInsideArea;
+    let cancelled = false;
+    measureDistanceToCustomer([
+      selectedAddress.longitude,
+      selectedAddress.latitude,
+    ]).then((result) => {
+      if (!cancelled) {
+        setAreaCheck({ addressId: selectedAddress.id, ...result });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAddress]);
+
+  // Resultatet gælder kun den adresse, det blev målt på.
+  const currentCheck =
+    selectedAddress && areaCheck?.addressId === selectedAddress.id ? areaCheck : null;
+
+  const isMeasuring = selectedAddress !== null && currentCheck === null;
+  const distanceKm = currentCheck?.distanceKm ?? null;
+  const isInsideArea = currentCheck?.isInsideArea === true;
+  const isOutsideArea = currentCheck?.isInsideArea === false;
 
   const todayIsoDate = new Date().toISOString().split("T")[0];
 
@@ -115,6 +133,7 @@ export function BookingForm() {
       setContact(emptyContact);
       setAddressText("");
       setSelectedAddress(null);
+      setAreaCheck(null);
       try {
         window.sessionStorage.removeItem(SELECTED_PACKAGE_STORAGE_KEY);
       } catch {
@@ -259,6 +278,7 @@ export function BookingForm() {
             onChange={(text) => {
               setAddressText(text);
               setSelectedAddress(null);
+              setAreaCheck(null);
             }}
             onSelect={handleAddressPicked}
           />
@@ -299,17 +319,26 @@ export function BookingForm() {
         </p>
       )}
 
+      {isMeasuring && (
+        <p className="text-sm text-ink-soft">Beregner cykelruten til din adresse...</p>
+      )}
+
       {isInsideArea && (
         <p className="flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
           <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-          Din adresse ligger inden for mit område (ca. {distanceKm} km herfra) – du kan booke direkte.
+          Din adresse ligger inden for mit område
+          {distanceKm !== null &&
+            ` (ca. ${distanceKm} km ${currentCheck?.isCyclingRoute ? "på cykel" : "herfra"})`}
+          {" "}– du kan booke direkte.
         </p>
       )}
 
       {isOutsideArea && (
         <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
           <p className="font-medium">
-            {serviceAreaConfig.outOfAreaMessage} (Din adresse er ca. {distanceKm} km væk.)
+            {serviceAreaConfig.outOfAreaMessage}
+            {distanceKm !== null &&
+              ` (Der er ca. ${distanceKm} km ${currentCheck?.isCyclingRoute ? "at cykle" : "i fugleflugt"}.)`}
           </p>
           <a
             href={`mailto:${serviceAreaConfig.outOfAreaEmail}?subject=${encodeURIComponent(

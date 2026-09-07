@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { pricingPackages } from "@/config/pricing";
 import { serviceAreaConfig } from "@/config/serviceArea";
-import { checkServiceArea, distanceInKm } from "@/lib/distance";
+import { checkServiceAreaByText, measureDistanceToCustomer } from "@/lib/distance";
 import { addressById } from "@/lib/dawa";
 import type { BookingRequest } from "@/types/booking";
 
@@ -91,18 +91,10 @@ async function verifyServiceArea(booking: BookingRequest) {
   const address = booking.addressId ? await addressById(booking.addressId) : null;
 
   if (!address) {
-    return checkServiceArea(booking.address, booking.postalCode);
+    return checkServiceAreaByText(booking.address, booking.postalCode);
   }
 
-  const distance = distanceInKm(
-    [serviceAreaConfig.centerLongitude, serviceAreaConfig.centerLatitude],
-    [address.longitude, address.latitude]
-  );
-
-  return {
-    isInsideArea: distance <= serviceAreaConfig.maxDistanceKm,
-    distanceKm: Math.round(distance * 10) / 10,
-  };
+  return measureDistanceToCustomer([address.longitude, address.latitude]);
 }
 
 export async function POST(request: Request) {

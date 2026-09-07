@@ -117,7 +117,7 @@ export function AddressMapPicker({
         {status === "loading" && "Henter kort..."}
         {status === "looking-up" && "Finder adressen..."}
         {status === "ready" && !notFound &&
-          `Klik på kortet, hvor du bor. Det grønne område viser, hvor der køres ud (${serviceAreaConfig.maxDistanceKm} km).`}
+          `Klik på kortet, hvor du bor. Det grønne område er vejledende – den præcise afstand måles på cykelruten (${serviceAreaConfig.maxDistanceKm} km), så steder på den anden side af fjorden tæller vejen rundt.`}
         {notFound && "Kunne ikke finde en adresse der – prøv at klikke tættere på en vej."}
       </p>
     </div>

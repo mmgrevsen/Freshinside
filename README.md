@@ -67,9 +67,13 @@ maxDistanceKm: 15,
 
 Kunder inden for den afstand kan booke direkte online. Ligger deres adresse længere væk, får de i stedet besked om at skrive til dig på den e-mail, der står i samme fil (`outOfAreaEmail`).
 
-Kunden vælger sin adresse enten ved at **skrive den** (der kommer forslag frem, mens man skriver) eller ved at **klikke på et kort**. Begge dele bruger Danmarks officielle adresseregister, så adressen altid er en rigtig adresse, og afstanden bliver helt præcis. Du skal ikke opsætte noget – der er hverken konto eller nøgle involveret.
+**Afstanden måles på den rute, du faktisk skal cykle** – ikke i fugleflugt. Det betyder meget her: Aabybro er kun 14 km i fugleflugt, men 32 km på cykel, fordi man skal rundt om Limfjorden. Ruten hentes fra BRouter, en gratis cykelrute-tjeneste – ingen konto eller nøgle nødvendig.
 
-Ændrer du `maxDistanceKm`, følger cirklen på kortet automatisk med.
+Får du senere bil eller knallert, kan du skifte `routingProfile` i samme fil (`"trekking"` = cykel, `"car-fast"` = bil).
+
+Kunden vælger sin adresse enten ved at **skrive den** (der kommer forslag frem, mens man skriver) eller ved at **klikke på et kort**. Begge dele bruger Danmarks officielle adresseregister, så adressen altid er rigtig.
+
+Cirklen på kortet er kun vejledende (den er tegnet i fugleflugt) – den præcise afgørelse sker på cykelruten, når kunden har valgt sin adresse.
 
 ---
 
@@ -175,7 +179,7 @@ Derefter får du en mail med kundens navn, telefon, adresse, valgte pakke og øn
 Sådan fungerer en booking i dag:
 
 1. Kunden udfylder formularen på forsiden og vælger sin adresse fra forslagene (eller på kortet).
-2. Afstanden fra din adresse til kundens regnes ud med det samme.
+2. Cykelruten fra din adresse til kundens beregnes, og længden vises for kunden.
 3. Er kunden **inden for** dit område (se `src/config/serviceArea.ts`), sendes forespørgslen afsted, og du får en e-mail (når du har sat det op – se afsnit 8).
 4. Er kunden **uden for** området, kan der ikke bookes direkte. I stedet vises en besked med en knap, der åbner en mail til dig, så I kan aftale det.
 

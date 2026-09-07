@@ -98,5 +98,5 @@ export const aboutContent = {
  */
 export const areaContent = {
   heading: "Vi kommer til dig",
-  description: `FreshInside kører ud inden for ca. 15 km i ${siteConfig.serviceArea} – her kan du booke direkte online. Bor du længere væk, er du velkommen til at skrive og høre, om det alligevel kan lade sig gøre.`,
+  description: `FreshInside kører ud inden for ca. 15 km på cykel i ${siteConfig.serviceArea} – her kan du booke direkte online. Bor du længere væk, er du velkommen til at skrive og høre, om det alligevel kan lade sig gøre.`,
 } as const;
