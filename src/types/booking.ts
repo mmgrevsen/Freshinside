@@ -16,5 +16,7 @@ export type BookingRequest = {
   email: string;
   address: string;
   postalCode: string;
+  /** DAWA's id for den valgte adresse – bruges til at tjekke afstanden på serveren */
+  addressId: string;
   message: string;
 };

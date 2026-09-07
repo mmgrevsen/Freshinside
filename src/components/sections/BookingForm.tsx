@@ -1,46 +1,50 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { pricingPackages } from "@/config/pricing";
 import { serviceAreaConfig } from "@/config/serviceArea";
-import { checkServiceArea } from "@/lib/distance";
+import { distanceInKm } from "@/lib/distance";
+import type { DawaAddress } from "@/lib/dawa";
 import { Button } from "@/components/ui/Button";
+import { AddressAutocomplete } from "@/components/ui/AddressAutocomplete";
+import { AddressMapPicker } from "@/components/ui/AddressMapPicker";
 import { SELECTED_PACKAGE_STORAGE_KEY } from "@/lib/constants";
 import { CheckIcon, MailIcon, MapPinIcon } from "@/components/ui/icons";
 import type { BookingRequest } from "@/types/booking";
 
-const emptyForm: BookingRequest = {
+type ContactFields = {
+  packageId: string;
+  date: string;
+  time: string;
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+};
+
+const emptyContact: ContactFields = {
   packageId: "",
   date: "",
   time: "",
   name: "",
   phone: "",
   email: "",
-  address: "",
-  postalCode: "",
   message: "",
 };
 
 type Status = "idle" | "submitting" | "success" | "error";
-type AreaStatus = "unknown" | "checking" | "inside" | "outside";
-
-/** Resultatet af et områdetjek, sammen med den adresse det gælder for. */
-type AreaResult = {
-  postalCode: string;
-  address: string;
-  isInsideArea: boolean;
-  distanceKm: number | null;
-};
 
 const inputClasses =
   "w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/50 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20";
 const labelClasses = "text-sm font-medium text-ink";
 
 export function BookingForm() {
-  const [form, setForm] = useState<BookingRequest>(emptyForm);
+  const [contact, setContact] = useState<ContactFields>(emptyContact);
+  const [addressText, setAddressText] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState<DawaAddress | null>(null);
+  const [showMap, setShowMap] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [areaResult, setAreaResult] = useState<AreaResult | null>(null);
 
   useEffect(() => {
     try {
@@ -49,86 +53,68 @@ export function BookingForm() {
         // Synkroniserer med sessionStorage (kun tilgængelig i browseren), derfor
         // sat efter mount i stedet for i den lazy useState-initializer.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setForm((current) => ({ ...current, packageId: savedPackageId }));
+        setContact((current) => ({ ...current, packageId: savedPackageId }));
       }
     } catch {
       // sessionStorage kan være utilgængelig – ikke kritisk, brugeren vælger blot pakke manuelt.
     }
   }, []);
 
-  // Slår kundens område op, kort tid efter postnummeret er skrevet færdigt.
-  const { postalCode, address } = form;
-  const hasValidPostalCode = /^\d{4}$/.test(postalCode);
+  const handleAddressPicked = useCallback((address: DawaAddress) => {
+    setSelectedAddress(address);
+    setAddressText(address.text);
+    setShowMap(false);
+  }, []);
 
-  useEffect(() => {
-    if (!/^\d{4}$/.test(postalCode)) return;
+  // Adressen har præcise koordinater med, så afstanden kan regnes ud med det samme.
+  const distanceKm = selectedAddress
+    ? Math.round(
+        distanceInKm(
+          [serviceAreaConfig.centerLongitude, serviceAreaConfig.centerLatitude],
+          [selectedAddress.longitude, selectedAddress.latitude]
+        ) * 10
+      ) / 10
+    : null;
 
-    let cancelled = false;
-    const timer = window.setTimeout(async () => {
-      const result = await checkServiceArea(address, postalCode);
-      if (cancelled) return;
-      setAreaResult({ postalCode, address, ...result });
-    }, 500);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [postalCode, address]);
-
-  // Resultatet gælder kun, hvis adressen ikke er ændret siden opslaget.
-  const resolvedArea =
-    areaResult &&
-    areaResult.postalCode === postalCode &&
-    areaResult.address === address
-      ? areaResult
-      : null;
-
-  const areaStatus: AreaStatus = !hasValidPostalCode
-    ? "unknown"
-    : resolvedArea
-      ? resolvedArea.isInsideArea
-        ? "inside"
-        : "outside"
-      : "checking";
-
-  const distanceKm = resolvedArea?.distanceKm ?? null;
+  const isInsideArea = distanceKm !== null && distanceKm <= serviceAreaConfig.maxDistanceKm;
+  const isOutsideArea = distanceKm !== null && !isInsideArea;
 
   const todayIsoDate = new Date().toISOString().split("T")[0];
 
-  function updateField<K extends keyof BookingRequest>(field: K, value: BookingRequest[K]) {
-    setForm((current) => ({ ...current, [field]: value }));
+  function updateField<K extends keyof ContactFields>(field: K, value: ContactFields[K]) {
+    setContact((current) => ({ ...current, [field]: value }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!selectedAddress) return;
+
     setStatus("submitting");
     setErrorMessage("");
+
+    const payload: BookingRequest = {
+      ...contact,
+      address: selectedAddress.text,
+      postalCode: selectedAddress.postalCode,
+      addressId: selectedAddress.id,
+    };
 
     try {
       const response = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
-
       if (!response.ok || !data.ok) {
-        if (data.outOfArea) {
-          setAreaResult({
-            postalCode,
-            address,
-            isInsideArea: false,
-            distanceKm: null,
-          });
-        }
         throw new Error(data.error || "Noget gik galt. Prøv igen.");
       }
 
       setStatus("success");
-      setForm(emptyForm);
-      setAreaResult(null);
+      setContact(emptyContact);
+      setAddressText("");
+      setSelectedAddress(null);
       try {
         window.sessionStorage.removeItem(SELECTED_PACKAGE_STORAGE_KEY);
       } catch {
@@ -160,8 +146,6 @@ export function BookingForm() {
     );
   }
 
-  const isOutsideArea = areaStatus === "outside";
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -172,7 +156,7 @@ export function BookingForm() {
           <select
             id="packageId"
             required
-            value={form.packageId}
+            value={contact.packageId}
             onChange={(e) => updateField("packageId", e.target.value)}
             className={inputClasses}
           >
@@ -196,7 +180,7 @@ export function BookingForm() {
             type="date"
             required
             min={todayIsoDate}
-            value={form.date}
+            value={contact.date}
             onChange={(e) => updateField("date", e.target.value)}
             className={inputClasses}
           />
@@ -210,7 +194,7 @@ export function BookingForm() {
             id="time"
             type="time"
             required
-            value={form.time}
+            value={contact.time}
             onChange={(e) => updateField("time", e.target.value)}
             className={inputClasses}
           />
@@ -226,7 +210,7 @@ export function BookingForm() {
             required
             autoComplete="name"
             placeholder="Dit fulde navn"
-            value={form.name}
+            value={contact.name}
             onChange={(e) => updateField("name", e.target.value)}
             className={inputClasses}
           />
@@ -242,7 +226,7 @@ export function BookingForm() {
             required
             autoComplete="tel"
             placeholder="12 34 56 78"
-            value={form.phone}
+            value={contact.phone}
             onChange={(e) => updateField("phone", e.target.value)}
             className={inputClasses}
           />
@@ -258,47 +242,40 @@ export function BookingForm() {
             required
             autoComplete="email"
             placeholder="dig@eksempel.dk"
-            value={form.email}
+            value={contact.email}
             onChange={(e) => updateField("email", e.target.value)}
             className={inputClasses}
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
           <label htmlFor="address" className={labelClasses}>
             Adresse
           </label>
-          <input
+          <AddressAutocomplete
             id="address"
-            type="text"
-            required
-            autoComplete="street-address"
-            placeholder="Vejnavn 12"
-            value={form.address}
-            onChange={(e) => updateField("address", e.target.value)}
-            className={inputClasses}
+            value={addressText}
+            inputClassName={inputClasses}
+            onChange={(text) => {
+              setAddressText(text);
+              setSelectedAddress(null);
+            }}
+            onSelect={handleAddressPicked}
           />
-        </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="postalCode" className={labelClasses}>
-            Postnummer
-          </label>
-          <input
-            id="postalCode"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]{4}"
-            maxLength={4}
-            required
-            autoComplete="postal-code"
-            placeholder="9000"
-            value={form.postalCode}
-            onChange={(e) =>
-              updateField("postalCode", e.target.value.replace(/\D/g, "").slice(0, 4))
-            }
-            className={inputClasses}
-          />
+          <button
+            type="button"
+            onClick={() => setShowMap((open) => !open)}
+            className="mt-1 w-fit text-sm font-medium text-brand-700 underline underline-offset-4 hover:text-brand-800"
+          >
+            {showMap ? "Skjul kortet" : "Eller vælg din adresse på et kort"}
+          </button>
+
+          {showMap && (
+            <div className="mt-2">
+              <AddressMapPicker onPick={handleAddressPicked} />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
@@ -309,35 +286,35 @@ export function BookingForm() {
             id="message"
             rows={4}
             placeholder="Fortæl f.eks. om bilens stand, eller hvor du gerne vil mødes."
-            value={form.message}
+            value={contact.message}
             onChange={(e) => updateField("message", e.target.value)}
             className={`${inputClasses} resize-none`}
           />
         </div>
       </div>
 
-      {areaStatus === "checking" && (
-        <p className="text-sm text-ink-soft">Tjekker om jeg kører ud til dig...</p>
+      {!selectedAddress && addressText.trim().length > 0 && (
+        <p className="text-sm text-ink-soft">
+          Vælg din adresse i listen (eller på kortet), så vi kan se, om vi kører ud til dig.
+        </p>
       )}
 
-      {areaStatus === "inside" && (
+      {isInsideArea && (
         <p className="flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-700">
           <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-          Din adresse ligger inden for mit område
-          {distanceKm !== null ? ` (ca. ${distanceKm} km herfra)` : ""} – du kan booke direkte.
+          Din adresse ligger inden for mit område (ca. {distanceKm} km herfra) – du kan booke direkte.
         </p>
       )}
 
       {isOutsideArea && (
         <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
           <p className="font-medium">
-            {serviceAreaConfig.outOfAreaMessage}
-            {distanceKm !== null ? ` (Din adresse er ca. ${distanceKm} km væk.)` : ""}
+            {serviceAreaConfig.outOfAreaMessage} (Din adresse er ca. {distanceKm} km væk.)
           </p>
           <a
             href={`mailto:${serviceAreaConfig.outOfAreaEmail}?subject=${encodeURIComponent(
               "Forespørgsel om bilrengøring uden for området"
-            )}`}
+            )}&body=${encodeURIComponent(`Hej Marcus\n\nJeg bor på ${addressText} og vil gerne høre, om du alligevel kan komme forbi.\n\nVenlig hilsen\n`)}`}
             className="inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-2.5 font-medium text-white transition-colors hover:bg-brand-700"
           >
             <MailIcon className="h-4 w-4" />
@@ -346,7 +323,7 @@ export function BookingForm() {
         </div>
       )}
 
-      {status === "error" && !isOutsideArea && (
+      {status === "error" && (
         <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
           {errorMessage}
         </p>
@@ -355,7 +332,7 @@ export function BookingForm() {
       <Button
         type="submit"
         size="lg"
-        disabled={status === "submitting" || isOutsideArea}
+        disabled={status === "submitting" || !isInsideArea}
         className="w-full disabled:cursor-not-allowed disabled:opacity-50"
       >
         {status === "submitting" ? "Sender..." : "Send bookingforespørgsel"}

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { pricingPackages } from "@/config/pricing";
 import { serviceAreaConfig } from "@/config/serviceArea";
-import { checkServiceArea } from "@/lib/distance";
+import { checkServiceArea, distanceInKm } from "@/lib/distance";
+import { addressById } from "@/lib/dawa";
 import type { BookingRequest } from "@/types/booking";
 
 /**
@@ -82,6 +83,28 @@ async function sendNotificationEmail(booking: BookingRequest, distanceKm: number
   }
 }
 
+/**
+ * Slår den valgte adresse op og måler afstanden hjem til dig.
+ * Falder tilbage til et tekstopslag, hvis id'et ikke kan bruges.
+ */
+async function verifyServiceArea(booking: BookingRequest) {
+  const address = booking.addressId ? await addressById(booking.addressId) : null;
+
+  if (!address) {
+    return checkServiceArea(booking.address, booking.postalCode);
+  }
+
+  const distance = distanceInKm(
+    [serviceAreaConfig.centerLongitude, serviceAreaConfig.centerLatitude],
+    [address.longitude, address.latitude]
+  );
+
+  return {
+    isInsideArea: distance <= serviceAreaConfig.maxDistanceKm,
+    distanceKm: Math.round(distance * 10) / 10,
+  };
+}
+
 export async function POST(request: Request) {
   let body: Partial<BookingRequest>;
 
@@ -124,10 +147,9 @@ export async function POST(request: Request) {
   const booking = body as BookingRequest;
 
   // Tjekkes igen her på serveren, så området ikke kan omgås i browseren.
-  const { isInsideArea, distanceKm } = await checkServiceArea(
-    booking.address,
-    booking.postalCode
-  );
+  // Vi slår selv adressen op ud fra dens id i stedet for at stole på de
+  // koordinater, browseren har sendt med.
+  const { isInsideArea, distanceKm } = await verifyServiceArea(booking);
 
   if (!isInsideArea) {
     return NextResponse.json(
