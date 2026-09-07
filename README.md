@@ -75,7 +75,7 @@ Får du senere bil eller knallert, kan du skifte `routingProfile` i samme fil (`
 
 Kunden vælger sin adresse enten ved at **skrive den** (der kommer forslag frem, mens man skriver) eller ved at **klikke på et kort**. Begge dele bruger Danmarks officielle adresseregister, så adressen altid er rigtig.
 
-Cirklen på kortet er kun vejledende (den er tegnet i fugleflugt) – den præcise afgørelse sker på cykelruten, når kunden har valgt sin adresse.
+Kortet viser det område, man reelt kan nå på cykel (altså med veje, broer og fjorden regnet med) – ikke en cirkel. Området hentes automatisk og følger med, når du ændrer `maxDistanceKm`.
 
 ---
 
