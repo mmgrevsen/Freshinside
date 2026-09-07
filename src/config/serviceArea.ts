@@ -21,6 +21,9 @@
  * https://api.dataforsyningen.dk/adresser?q=DIN+ADRESSE
  */
 
+/** Måderne du kan komme frem på */
+type RoutingProfile = "trekking" | "fastbike" | "car-fast";
+
 export const serviceAreaConfig = {
   /** Længdegrad (x) for dit udgangspunkt */
   centerLongitude: 9.74,
@@ -36,7 +39,7 @@ export const serviceAreaConfig = {
    *   "fastbike"  = hurtig cykel/racer (holder sig mere til veje)
    *   "car-fast"  = bil
    */
-  routingProfile: "trekking",
+  routingProfile: "trekking" as RoutingProfile,
 
   /** Her skal kunder uden for området skrive til */
   outOfAreaEmail: "mmgrevsen@gmail.com",
