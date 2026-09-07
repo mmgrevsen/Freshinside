@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/**
+ * FARVER OG TEMA
+ * ------------------------------------------------
+ * FreshInside bruger et fast, lyst design med mørke kontraster og en
+ * frisk accentfarve (teal/mint). Ret HSL/hex-værdierne herunder for at
+ * ændre farvepaletten på hele hjemmesiden.
+ */
+:root {
+  --color-paper: #fbfdfc;
+  --color-paper-muted: #f2f6f5;
+  --color-ink: #0b1220;
+  --color-ink-soft: #33404f;
+
+  --color-brand-50: #eafbf8;
+  --color-brand-100: #cdf5ee;
+  --color-brand-200: #9cebde;
+  --color-brand-300: #62d9c9;
+  --color-brand-400: #33c2b2;
+  --color-brand-500: #14a79a;
+  --color-brand-600: #0e8a80;
+  --color-brand-700: #0b6e66;
+  --color-brand-800: #0a5852;
+  --color-brand-900: #084945;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-muted: var(--color-paper-muted);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+
+  --color-brand-50: var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-900: var(--color-brand-900);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* Sørg for at ankersektioner ikke gemmer sig under den faste header */
+section[id] {
+  scroll-margin-top: 5rem;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+.animate-float {
+  animation: float 3.5s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
