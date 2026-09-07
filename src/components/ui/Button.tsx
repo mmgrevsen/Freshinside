@@ -5,7 +5,7 @@ type Size = "md" | "lg";
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    "bg-ink text-white hover:bg-brand-700 focus-visible:outline-brand-500 shadow-sm shadow-ink/10",
+    "btn-shine bg-ink text-white hover:bg-brand-700 focus-visible:outline-brand-500 shadow-sm shadow-ink/10 hover:shadow-lg hover:shadow-brand-500/25",
   secondary:
     "bg-white text-ink border border-ink/15 hover:border-brand-400 hover:text-brand-700 focus-visible:outline-brand-500",
   ghost: "text-ink hover:text-brand-700 focus-visible:outline-brand-500",

@@ -5,6 +5,7 @@ import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { StickyMobileBookButton } from "@/components/layout/StickyMobileBookButton";
+import { ScrollProgress } from "@/components/layout/ScrollProgress";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,6 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} – ${siteConfig.slogan}`,
     description: siteConfig.shortDescription,
-    images: [{ url: "/images/hero-car-interior.svg" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -70,6 +70,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Spring til indhold
         </a>
+        <ScrollProgress />
         <Navbar />
         <main id="hovedindhold" className="flex-1 pb-20 lg:pb-0">
           {children}

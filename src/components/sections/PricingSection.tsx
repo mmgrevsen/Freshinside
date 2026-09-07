@@ -20,14 +20,25 @@ export function PricingSection() {
 
         <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
           {pricingPackages.map((pkg, index) => (
-            <Reveal key={pkg.id} delay={index * 100}>
+            <Reveal
+              key={pkg.id}
+              delay={index * 120}
+              from="scale"
+              className={`h-full ${pkg.popular ? "md:-mt-4" : ""}`}
+            >
               <div
-                className={`relative flex h-full flex-col gap-6 rounded-2xl border p-8 transition-shadow duration-300 hover:shadow-xl hover:shadow-ink/5 ${
+                className={`card-lift relative flex h-full flex-col gap-6 rounded-2xl border p-8 ${
                   pkg.popular
-                    ? "border-brand-400 bg-white shadow-lg shadow-brand-500/10"
+                    ? "border-brand-400 bg-white shadow-lg shadow-brand-500/15"
                     : "border-ink/10 bg-white"
                 }`}
               >
+                {pkg.popular && (
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -inset-px -z-10 rounded-2xl bg-gradient-to-b from-brand-300/40 to-transparent blur-sm"
+                  />
+                )}
                 {pkg.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                     <Badge tone="brand">Mest populær</Badge>

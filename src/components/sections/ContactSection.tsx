@@ -41,7 +41,7 @@ export function ContactSection() {
           {contactItems.map((item) => (
             <div
               key={item.label}
-              className="flex items-start gap-4 rounded-2xl border border-ink/10 bg-white p-6"
+              className="card-lift flex items-start gap-4 rounded-2xl border border-ink/10 bg-white p-6"
             >
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
                 <item.icon className="h-5 w-5" />
