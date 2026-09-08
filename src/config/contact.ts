@@ -1,15 +1,15 @@
 /**
  * KONTAKTOPLYSNINGER OG ÅBNINGSTIDER
  * ------------------------------------------------
- * VIGTIGT: telefonnummer og e-mail herunder er PLACEHOLDERS.
- * Ret dem til dine rigtige oplysninger, før hjemmesiden går live.
+ * Ret dine oplysninger her – de bliver brugt både i kontaktsektionen
+ * og i footeren.
  */
 
 export const contactInfo = {
   phone: {
-    display: "+45 00 00 00 00",
+    display: "50 25 50 19",
     // Bruges til "ring op"-links – kun tal, gerne med landekode
-    href: "tel:+4500000000",
+    href: "tel:+4550255019",
   },
   email: {
     display: "mmgrevsen@gmail.com",
@@ -25,7 +25,8 @@ export const contactInfo = {
  * hvis der ikke er åbent den dag.
  */
 export const openingHours = [
-  { days: "Mandag – Fredag", hours: "15:00 – 19:00" },
-  { days: "Lørdag", hours: "10:00 – 16:00" },
-  { days: "Søndag", hours: "Lukket" },
+  { days: "Mandag – Torsdag", hours: "Lukket" },
+  { days: "Fredag", hours: "16:00 – 21:00" },
+  { days: "Lørdag", hours: "10:00 – 20:00" },
+  { days: "Søndag", hours: "10:00 – 20:00" },
 ] as const;
