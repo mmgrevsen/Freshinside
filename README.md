@@ -231,6 +231,8 @@ Sådan fungerer en booking i dag:
 
 Både afstanden **og** tidspunktet bliver tjekket igen på serveren, så hverken området eller en optaget tid kan omgås ved at pille ved siden i browseren.
 
+**Hvis adresseregistret er nede:** Adresseforslagene kommer fra Danmarks officielle adresseregister (Dataforsyningen). Er den tjeneste nede, kan hjemmesiden ikke måle afstanden. I stedet for at spærre for booking får kunden så et felt til selv at skrive adresse og postnummer, og forespørgslen sendes videre til dig. I mailen står der `Afstand: KUNNE IKKE TJEKKES`, så du selv kan se efter, om du vil køre derud. Bedre at få forespørgslen end at miste kunden.
+
 Der er **endnu ikke** en database, så bookinger gemmes ikke i en liste, du kan bladre i – de kommer kun på mail. Vil du senere have en rigtig oversigt over alle bookinger, kan der kobles en database på (f.eks. [Supabase](https://supabase.com)); der ligger en guide øverst i `src/app/api/booking/route.ts`.
 
 ---

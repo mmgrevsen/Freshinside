@@ -67,7 +67,12 @@ function formatBookingEmail(booking: BookingRequest, distanceKm: number | null) 
     `Telefon:   ${booking.phone}`,
     `E-mail:    ${booking.email}`,
     `Adresse:   ${booking.address}, ${booking.postalCode}`,
-    distanceKm !== null ? `Afstand:   ca. ${distanceKm} km herfra` : "",
+    distanceKm !== null
+      ? `Afstand:   ca. ${distanceKm} km herfra`
+      : "Afstand:   KUNNE IKKE TJEKKES – tjek selv, om du vil køre derud",
+    booking.addressId
+      ? ""
+      : "OBS:       Kunden skrev selv adressen (adresseregistret var nede)",
     "",
     "Besked fra kunden:",
     booking.message?.trim() || "(ingen besked)",

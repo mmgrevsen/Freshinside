@@ -28,6 +28,7 @@ export function AddressMapPicker({
   const markerRef = useRef<Marker | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "looking-up">("loading");
   const [notFound, setNotFound] = useState(false);
+  const [lookupFailed, setLookupFailed] = useState(false);
   const [isAreaExact, setIsAreaExact] = useState(false);
 
   useEffect(() => {
@@ -108,13 +109,22 @@ export function AddressMapPicker({
 
         setStatus("looking-up");
         setNotFound(false);
-        const address = await addressFromCoordinates(lng, lat);
+        setLookupFailed(false);
+
+        let address: DawaAddress | null = null;
+        let failed = false;
+        try {
+          address = await addressFromCoordinates(lng, lat);
+        } catch {
+          failed = true;
+        }
         if (cancelled) return;
 
         setStatus("ready");
+        setLookupFailed(failed);
         if (address) {
           onPick(address);
-        } else {
+        } else if (!failed) {
           setNotFound(true);
         }
       });
@@ -141,12 +151,14 @@ export function AddressMapPicker({
       <p className="text-xs text-ink-soft">
         {status === "loading" && "Henter kort..."}
         {status === "looking-up" && "Finder adressen..."}
-        {status === "ready" && !notFound && (
+        {status === "ready" && !notFound && !lookupFailed && (
           isAreaExact
             ? `Klik på kortet, hvor du bor. Det grønne område er præcis så langt, der cykles ud (${serviceAreaConfig.maxDistanceKm} km ad vejen).`
             : `Klik på kortet, hvor du bor. Det grønne område er vejledende – den præcise afstand måles på cykelruten (${serviceAreaConfig.maxDistanceKm} km).`
         )}
         {notFound && "Kunne ikke finde en adresse der – prøv at klikke tættere på en vej."}
+        {lookupFailed &&
+          "Adresseopslaget svarer ikke lige nu. Luk kortet og skriv din adresse i feltet i stedet."}
       </p>
     </div>
   );

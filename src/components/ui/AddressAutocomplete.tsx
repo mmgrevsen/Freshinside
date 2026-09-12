@@ -14,12 +14,15 @@ export function AddressAutocomplete({
   value,
   onChange,
   onSelect,
+  onUnavailable,
   inputClassName = "",
   id,
 }: {
   value: string;
   onChange: (text: string) => void;
   onSelect: (address: DawaAddress) => void;
+  /** Kaldes når adresseregistret ikke kan nås, så formularen kan tilbyde et andet felt. */
+  onUnavailable?: (unavailable: boolean) => void;
   inputClassName?: string;
   id?: string;
 }) {
@@ -34,6 +37,11 @@ export function AddressAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null);
   // Sættes når brugeren vælger et forslag, så vi ikke straks søger igen på samme tekst.
   const justSelectedRef = useRef(false);
+  // Gemmes i en ref, så effekten ikke kører igen, bare fordi forælderen gentegner.
+  const onUnavailableRef = useRef(onUnavailable);
+  useEffect(() => {
+    onUnavailableRef.current = onUnavailable;
+  }, [onUnavailable]);
 
   useEffect(() => {
     if (justSelectedRef.current) {
@@ -52,8 +60,14 @@ export function AddressAutocomplete({
         setSuggestions(results);
         setIsOpen(results.length > 0);
         setHighlighted(-1);
-      } catch {
-        // Afbrudt søgning eller netværksfejl – kunden kan stadig skrive adressen selv.
+        onUnavailableRef.current?.(false);
+      } catch (error) {
+        // En afbrudt søgning er helt normal – der er ikke noget galt.
+        if ((error as Error)?.name === "AbortError") return;
+
+        // Adresseregistret kan ikke nås. Kunden skal ikke gå i stå her,
+        // så vi siger det til formularen, der åbner et felt til postnummer.
+        onUnavailableRef.current?.(true);
       }
     }, 250);
 

@@ -71,6 +71,8 @@ export function BookingForm() {
   const [areaCheck, setAreaCheck] = useState<(AreaCheck & { addressId: string }) | null>(
     null
   );
+  const [addressLookupDown, setAddressLookupDown] = useState(false);
+  const [manualPostalCode, setManualPostalCode] = useState("");
   const [showMap, setShowMap] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -176,9 +178,21 @@ export function BookingForm() {
   const slotsMessage = currentAvailability?.message ?? null;
   const timeIsAvailable = time !== "" && slots.includes(time);
 
+  // Er adresseregistret nede, må kunden skrive adressen selv. Så kan vi
+  // ikke måle afstanden i browseren – den tjekkes på serveren, og kan
+  // den heller ikke der, tager vi imod forespørgslen og du siger selv
+  // til, hvis det er for langt. Bedre end at kunden går i stå.
+  const usingManualAddress =
+    addressLookupDown &&
+    selectedAddress === null &&
+    addressText.trim().length >= 5 &&
+    /^\d{4}$/.test(manualPostalCode.trim());
+
+  const addressIsReady = isInsideArea || usingManualAddress;
+
   const canContinue = [
     Boolean(packageId),
-    Boolean(date && timeIsAvailable && isInsideArea),
+    Boolean(date && timeIsAvailable && addressIsReady),
     Boolean(contact.name && contact.phone && contact.email),
   ];
 
@@ -199,12 +213,13 @@ export function BookingForm() {
     setAddressText("");
     setSelectedAddress(null);
     setAreaCheck(null);
+    setManualPostalCode("");
     setStatus("idle");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selectedAddress || !chosenPackage) return;
+    if (!chosenPackage || !addressIsReady) return;
 
     setStatus("submitting");
     setErrorMessage("");
@@ -214,9 +229,9 @@ export function BookingForm() {
       date,
       time,
       ...contact,
-      address: selectedAddress.text,
-      postalCode: selectedAddress.postalCode,
-      addressId: selectedAddress.id,
+      address: selectedAddress?.text ?? addressText.trim(),
+      postalCode: selectedAddress?.postalCode ?? manualPostalCode.trim(),
+      addressId: selectedAddress?.id,
       addOnIds: selectedAddOnIds,
       totalPrice,
     };
@@ -496,6 +511,7 @@ export function BookingForm() {
                 setAreaCheck(null);
               }}
               onSelect={handleAddressPicked}
+              onUnavailable={setAddressLookupDown}
             />
 
             <button
@@ -513,13 +529,42 @@ export function BookingForm() {
             )}
           </div>
 
-          {!selectedAddress && addressText.trim().length > 0 && (
+          {addressLookupDown && !selectedAddress && (
+            <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+              <p>
+                Adresseforslagene virker ikke lige nu – det er Danmarks
+                adresseregister, der er nede, ikke dig. Skriv i stedet din
+                adresse og dit postnummer, så tjekker jeg selv afstanden, når
+                jeg bekræfter din tid.
+              </p>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="postalCode" className={labelClasses}>
+                  Postnummer
+                </label>
+                <input
+                  id="postalCode"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  placeholder="9240"
+                  maxLength={4}
+                  value={manualPostalCode}
+                  onChange={(e) =>
+                    setManualPostalCode(e.target.value.replace(/\D/g, ""))
+                  }
+                  className={`${inputClasses} max-w-40`}
+                />
+              </div>
+            </div>
+          )}
+
+          {!addressLookupDown && !selectedAddress && addressText.trim().length > 0 && (
             <p className="text-sm text-ink-soft">
               Vælg din adresse i listen (eller på kortet), så vi kan se, om vi kører ud til dig.
             </p>
           )}
 
-          {isMeasuring && (
+          {isMeasuring && !addressLookupDown && (
             <p className="text-sm text-ink-soft">Beregner cykelruten til din adresse...</p>
           )}
 

@@ -16,8 +16,12 @@ export type BookingRequest = {
   email: string;
   address: string;
   postalCode: string;
-  /** DAWA's id for den valgte adresse – bruges til at tjekke afstanden på serveren */
-  addressId: string;
+  /**
+   * DAWA's id for den valgte adresse – bruges til at tjekke afstanden på
+   * serveren. Mangler, hvis adresseregistret var nede, og kunden selv
+   * skrev adressen. Så tjekkes afstanden ud fra teksten i stedet.
+   */
+  addressId?: string;
   /** Id'er på valgte ekstra services fra src/config/addons.ts */
   addOnIds: string[];
   /** Samlet pris i kroner (pakke + ekstra services) */
