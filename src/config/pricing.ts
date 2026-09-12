@@ -19,6 +19,12 @@ export type PricingPackage = {
   priceSuffix: string;
   /** Cirka hvor lang tid pakken tager – vises på pakkekortet */
   duration: string;
+  /**
+   * Hvor mange minutter pakken optager i kalenderen. Bruges til at
+   * regne ud, hvilke tider der er ledige. Sæt den til den LÆNGSTE tid,
+   * pakken kan tage, så du ikke får to bookinger oven i hinanden.
+   */
+  blockMinutes: number;
   description: string;
   features: string[];
   popular?: boolean;
@@ -32,6 +38,7 @@ export const pricingPackages: PricingPackage[] = [
     price: 219,
     priceSuffix: "kr.",
     duration: "Ca. 1–1,5 time",
+    blockMinutes: 90,
     description: "Grundig rengøring af hele kabinen – den mest valgte pakke.",
     features: [
       "Grundig støvsugning",
@@ -51,6 +58,7 @@ export const pricingPackages: PricingPackage[] = [
     price: 319,
     priceSuffix: "kr.",
     duration: "Ca. 2–3 timer",
+    blockMinutes: 180,
     description: "Den grundige totalrengøring til bilen, der fortjener ekstra fokus.",
     features: [
       "Alt fra Fresh Clean",

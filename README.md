@@ -34,7 +34,8 @@ Al indhold, du med stor sandsynlighed vil ændre, ligger samlet i mappen **`src/
 |---|---|
 | `src/config/pricing.ts` | Priser, pakkenavne, beskrivelser og hvad der er inkluderet i hver pakke |
 | `src/config/serviceArea.ts` | Hvor langt du kører ud (km), og hvem folk uden for området skal skrive til |
-| `src/config/contact.ts` | Telefonnummer, e-mail, område og åbningstider |
+| `src/config/contact.ts` | Telefonnummer, e-mail og område |
+| `src/config/schedule.ts` | **Åbningstider** – og dermed også hvilke tider kunden kan booke |
 | `src/config/site.ts` | Navn, slogan, "Sådan fungerer det", "Om FreshInside"-tekst, område-tekst og menu-links |
 | `src/config/testimonials.ts` | Kundeanmeldelser (husk at slå `isPlaceholder` fra, når det er en rigtig anmeldelse) |
 | `src/config/faq.ts` | Spørgsmål og svar i FAQ-sektionen |
@@ -76,6 +77,30 @@ Får du senere bil eller knallert, kan du skifte `routingProfile` i samme fil (`
 Kunden vælger sin adresse enten ved at **skrive den** (der kommer forslag frem, mens man skriver) eller ved at **klikke på et kort**. Begge dele bruger Danmarks officielle adresseregister, så adressen altid er rigtig.
 
 Kortet viser det område, man reelt kan nå på cykel (altså med veje, broer og fjorden regnet med) – ikke en cirkel. Området hentes automatisk og følger med, når du ændrer `maxDistanceKm`.
+
+### Eksempel: Ændre dine åbningstider
+
+Åbn `src/config/schedule.ts`. Hver linje er én ugedag – mandag øverst, søndag nederst:
+
+```ts
+{ open: false },                            // Torsdag
+{ open: true, from: "15:00", to: "20:00" }, // Fredag
+```
+
+Det ene sted styrer **både** åbningstiderne, der står på hjemmesiden, **og** hvilke tidspunkter kunden kan vælge, når der bookes. Så du kan ikke komme til at glemme det ene sted.
+
+`to` er det tidspunkt, du er **færdig** – ikke det seneste, man kan starte. Har du åbent til 20:00, og Fresh Deep tager 3 timer, er den seneste starttid altså 17:00. Det regner hjemmesiden selv ud.
+
+I samme fil kan du også skrue på:
+
+| Indstilling | Betyder |
+|---|---|
+| `slotStepMinutes: 30` | Tider kan starte hver halve time (10:00, 10:30, 11:00 ...) |
+| `bufferMinutes: 30` | Der er altid mindst en halv time mellem to bookinger |
+| `maxDaysAhead: 60` | Kunden kan booke op til 60 dage frem |
+| `minHoursNotice: 12` | Der skal bestilles mindst 12 timer i forvejen |
+
+Hvor lang tid hver pakke tager, står som `blockMinutes` i `src/config/pricing.ts`. Sæt den til den **længste** tid, pakken kan tage – så undgår du at komme til at love to biler på én gang.
 
 ---
 
@@ -176,22 +201,41 @@ Derefter får du en mail med kundens navn, telefon, adresse, valgte pakke og øn
 
 **Indtil du har sat det op:** bookinger går ikke tabt — de bliver skrevet i loggen på Vercel. Du finder dem under dit projekt → **Logs**. Men det er nemmest at få dem på mail, så det anbefales at sætte det op.
 
-## 9. Om booking-systemet
+## 9. Sørg for at to kunder ikke booker samme tid
+
+Booking-formularen viser kun de tidspunkter, der er ledige. For at den kan huske, hvad der allerede er booket, skal den bruge et lille sted at gemme det. Det er gratis og tager ca. 3 minutter:
+
+1. Gå til dit projekt på [vercel.com](https://vercel.com) → fanen **Storage**.
+2. Klik **Create Database** og vælg **Upstash → Redis**. Vælg den gratis plan, og vælg gerne en server i Europa.
+3. Klik **Connect** for at koble den til dit `freshinside`-projekt.
+4. Gå til **Deployments**, klik **⋯** ved den nyeste og vælg **Redeploy**.
+
+Vercel opretter selv de to nøgler, hjemmesiden leder efter (`KV_REST_API_URL` og `KV_REST_API_TOKEN`) – du skal ikke skrive noget ind manuelt.
+
+**Sådan virker det bagefter:** Når nogen booker fredag kl. 15:00 til Fresh Deep, bliver 15:00–18:00 (plus en halv times pause) fjernet fra listen for de næste kunder. Booker en anden Fresh Clean lørdag kl. 12:00, forsvinder kun 12:00–13:30 den dag.
+
+**Indtil du har sat det op:** hjemmesiden virker helt som normalt, og kunderne kan kun vælge tider inden for din åbningstid. Men to kunder *kan* nå at vælge samme tidspunkt, og så må du ringe til den ene. Derfor er det en god idé at få det sat op.
+
+> Vil du selv aflyse eller blokere en tid (f.eks. fordi du skal til fodbold), kan du ikke gøre det fra hjemmesiden endnu. Sig til, så bygger vi en lille side til det.
+
+---
+
+## 10. Om booking-systemet
 
 Sådan fungerer en booking i dag:
 
-1. Kunden udfylder formularen på forsiden og vælger sin adresse fra forslagene (eller på kortet).
-2. Cykelruten fra din adresse til kundens beregnes, og længden vises for kunden.
+1. Kunden vælger pakke, og derefter en dato. Hjemmesiden viser kun de tidspunkter, der både ligger inden for din åbningstid og er ledige.
+2. Kunden vælger sin adresse fra forslagene (eller på kortet), og cykelruten hjem til dig beregnes.
 3. Er kunden **inden for** dit område (se `src/config/serviceArea.ts`), sendes forespørgslen afsted, og du får en e-mail (når du har sat det op – se afsnit 8).
 4. Er kunden **uden for** området, kan der ikke bookes direkte. I stedet vises en besked med en knap, der åbner en mail til dig, så I kan aftale det.
 
-Afstanden bliver også tjekket på serveren, så området ikke kan omgås ved at pille ved siden i browseren.
+Både afstanden **og** tidspunktet bliver tjekket igen på serveren, så hverken området eller en optaget tid kan omgås ved at pille ved siden i browseren.
 
 Der er **endnu ikke** en database, så bookinger gemmes ikke i en liste, du kan bladre i – de kommer kun på mail. Vil du senere have en rigtig oversigt over alle bookinger, kan der kobles en database på (f.eks. [Supabase](https://supabase.com)); der ligger en guide øverst i `src/app/api/booking/route.ts`.
 
 ---
 
-## 10. Projektstruktur (kort overblik)
+## 11. Projektstruktur (kort overblik)
 
 ```
 src/
@@ -209,7 +253,7 @@ public/
 
 ---
 
-## 11. Teknologi
+## 12. Teknologi
 
 Hjemmesiden er bygget med:
 

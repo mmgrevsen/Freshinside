@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
-import { pricingPackages } from "@/config/pricing";
+import { pricingPackages, type PricingPackage } from "@/config/pricing";
 import { addOns } from "@/config/addons";
 import { serviceAreaConfig } from "@/config/serviceArea";
 import { checkServiceAreaByText, measureDistanceToCustomer } from "@/lib/distance";
 import { addressById } from "@/lib/dawa";
+import { bookingsOnDate, reserveBooking } from "@/lib/bookingStore";
+import {
+  availableStartTimes,
+  minutesFromTime,
+  timeFromMinutes,
+  weekdayName,
+} from "@/lib/schedule";
 import type { BookingRequest } from "@/types/booking";
 
 /**
@@ -116,6 +123,29 @@ async function verifyServiceArea(booking: BookingRequest) {
   return measureDistanceToCustomer([address.longitude, address.latitude]);
 }
 
+/**
+ * Tjekker at det ønskede tidspunkt overhovedet findes: at der er åbent,
+ * at der er varslet i tide, og at ingen andre har taget tiden.
+ * Tjekkes her på serveren, så det ikke kan omgås i browseren.
+ */
+async function verifyTimeSlot(booking: BookingRequest, chosenPackage: PricingPackage) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(booking.date) || !/^\d{2}:\d{2}$/.test(booking.time)) {
+    return { ok: false as const, error: "Vælg venligst en dato og et tidspunkt." };
+  }
+
+  const booked = await bookingsOnDate(booking.date);
+  const available = availableStartTimes(booking.date, chosenPackage.blockMinutes, booked);
+
+  if (available.includes(booking.time)) return { ok: true as const };
+
+  return {
+    ok: false as const,
+    error: booked.length > 0
+      ? "Tiden blev desværre lige booket af en anden. Vælg et andet tidspunkt."
+      : `Jeg kan desværre ikke ${weekdayName(booking.date).toLowerCase()} kl. ${booking.time}. Vælg et af de ledige tidspunkter.`,
+  };
+}
+
 export async function POST(request: Request) {
   let body: Partial<BookingRequest>;
 
@@ -147,8 +177,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const validPackage = pricingPackages.some((pkg) => pkg.id === body.packageId);
-  if (!validPackage) {
+  const chosenPackage = pricingPackages.find((pkg) => pkg.id === body.packageId);
+  if (!chosenPackage) {
     return NextResponse.json(
       { ok: false, error: "Ukendt rengøringspakke." },
       { status: 400 }
@@ -156,6 +186,11 @@ export async function POST(request: Request) {
   }
 
   const booking = body as BookingRequest;
+
+  const slot = await verifyTimeSlot(booking, chosenPackage);
+  if (!slot.ok) {
+    return NextResponse.json({ ok: false, error: slot.error }, { status: 409 });
+  }
 
   // Tjekkes igen her på serveren, så området ikke kan omgås i browseren.
   // Vi slår selv adressen op ud fra dens id i stedet for at stole på de
@@ -170,6 +205,27 @@ export async function POST(request: Request) {
         error: serviceAreaConfig.outOfAreaMessage,
       },
       { status: 422 }
+    );
+  }
+
+  // Tiden markeres som optaget, så den forsvinder for de næste kunder.
+  const reservation = await reserveBooking(
+    booking.date,
+    {
+      start: booking.time,
+      end: timeFromMinutes(minutesFromTime(booking.time) + chosenPackage.blockMinutes),
+      name: booking.name,
+    },
+    chosenPackage.blockMinutes
+  );
+
+  if (!reservation.reserved && reservation.reason === "taken") {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Tiden blev desværre lige booket af en anden. Vælg et andet tidspunkt.",
+      },
+      { status: 409 }
     );
   }
 

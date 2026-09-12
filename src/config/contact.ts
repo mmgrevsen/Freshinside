@@ -1,5 +1,5 @@
 /**
- * KONTAKTOPLYSNINGER OG ÅBNINGSTIDER
+ * KONTAKTOPLYSNINGER
  * ------------------------------------------------
  * Ret dine oplysninger her – de bliver brugt både i kontaktsektionen
  * og i footeren.
@@ -21,12 +21,11 @@ export const contactInfo = {
 /**
  * ÅBNINGSTIDER
  * ------------------------------------------------
- * Skriv en linje pr. dag (eller dagsinterval). "Lukket" vises,
- * hvis der ikke er åbent den dag.
+ * Åbningstiderne står IKKE her længere – de står i
+ * src/config/schedule.ts, fordi de samme tider også bestemmer,
+ * hvilke tidspunkter kunden kan booke.
+ *
+ * Retter du dem der, opdaterer både denne liste og booking-formularen
+ * sig automatisk.
  */
-export const openingHours = [
-  { days: "Mandag – Torsdag", hours: "Lukket" },
-  { days: "Fredag", hours: "16:00 – 21:00" },
-  { days: "Lørdag", hours: "10:00 – 20:00" },
-  { days: "Søndag", hours: "10:00 – 20:00" },
-] as const;
+export { openingHoursDisplay as openingHours } from "@/lib/schedule";

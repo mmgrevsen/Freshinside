@@ -5,6 +5,8 @@ import { pricingPackages } from "@/config/pricing";
 import { addOns } from "@/config/addons";
 import { serviceAreaConfig } from "@/config/serviceArea";
 import { beforeVisitSteps } from "@/config/site";
+import { weekSchedule, weekdayNames } from "@/config/schedule";
+import { bookingDateRange } from "@/lib/schedule";
 import { measureDistanceToCustomer, type AreaCheck } from "@/lib/distance";
 import type { DawaAddress } from "@/lib/dawa";
 import { Button } from "@/components/ui/Button";
@@ -42,12 +44,27 @@ const inputClasses =
   "w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-soft/50 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20";
 const labelClasses = "text-sm font-medium text-ink";
 
+/** "fredag, lørdag og søndag" – læses ud af åbningstiderne. */
+const openDaysText = (() => {
+  const days = weekdayNames.filter((_, index) => weekSchedule[index].open);
+  if (days.length === 0) return "";
+  const lower = days.map((day) => day.toLowerCase());
+  return lower.length === 1
+    ? lower[0]
+    : `${lower.slice(0, -1).join(", ")} og ${lower[lower.length - 1]}`;
+})();
+
 export function BookingForm() {
   const [step, setStep] = useState(0);
   const [packageId, setPackageId] = useState("");
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [availability, setAvailability] = useState<{
+    key: string;
+    times: string[];
+    message: string | null;
+  } | null>(null);
   const [contact, setContact] = useState<ContactFields>(emptyContact);
   const [addressText, setAddressText] = useState("");
   const [selectedAddress, setSelectedAddress] = useState<DawaAddress | null>(null);
@@ -81,6 +98,37 @@ export function BookingForm() {
     window.addEventListener(BOOKING_SELECTION_EVENT, onSelection);
     return () => window.removeEventListener(BOOKING_SELECTION_EVENT, onSelection);
   }, []);
+
+  // Henter de ledige tider, hver gang kunden vælger en dato eller pakke.
+  useEffect(() => {
+    if (!date || !packageId) return;
+
+    const key = `${date}|${packageId}`;
+    let cancelled = false;
+
+    fetch(`/api/availability?date=${date}&packageId=${packageId}`)
+      .then((response) => response.json())
+      .then((data: { times?: string[]; message?: string | null }) => {
+        if (cancelled) return;
+        setAvailability({
+          key,
+          times: Array.isArray(data.times) ? data.times : [],
+          message: data.message ?? null,
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAvailability({
+          key,
+          times: [],
+          message: "Kunne ikke hente de ledige tider lige nu. Prøv igen.",
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [date, packageId]);
 
   const handleAddressPicked = useCallback((address: DawaAddress) => {
     setSelectedAddress(address);
@@ -117,11 +165,20 @@ export function BookingForm() {
     (chosenPackage?.price ?? 0) +
     chosenAddOns.reduce((sum, addOn) => sum + addOn.price, 0);
 
-  const todayIsoDate = new Date().toISOString().split("T")[0];
+  const dateRange = bookingDateRange();
+
+  // Svaret hører kun til den dato og pakke, det blev hentet for.
+  const availabilityKey = date && packageId ? `${date}|${packageId}` : "";
+  const currentAvailability =
+    availabilityKey && availability?.key === availabilityKey ? availability : null;
+  const slotsLoading = availabilityKey !== "" && currentAvailability === null;
+  const slots = currentAvailability?.times ?? [];
+  const slotsMessage = currentAvailability?.message ?? null;
+  const timeIsAvailable = time !== "" && slots.includes(time);
 
   const canContinue = [
     Boolean(packageId),
-    Boolean(date && time && isInsideArea),
+    Boolean(date && timeIsAvailable && isInsideArea),
     Boolean(contact.name && contact.phone && contact.email),
   ];
 
@@ -137,6 +194,7 @@ export function BookingForm() {
     setSelectedAddOnIds([]);
     setDate("");
     setTime("");
+    setAvailability(null);
     setContact(emptyContact);
     setAddressText("");
     setSelectedAddress(null);
@@ -372,25 +430,55 @@ export function BookingForm() {
                 id="date"
                 type="date"
                 required
-                min={todayIsoDate}
+                min={dateRange.min}
+                max={dateRange.max}
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  setTime("");
+                }}
                 className={inputClasses}
               />
+              <p className="text-xs text-ink-soft">
+                Jeg kører ud {openDaysText}.
+              </p>
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="time" className={labelClasses}>
-                Ønsket tidspunkt
+                Ledige tidspunkter
               </label>
-              <input
+              <select
                 id="time"
-                type="time"
                 required
-                value={time}
+                disabled={!date || slots.length === 0}
+                value={timeIsAvailable ? time : ""}
                 onChange={(e) => setTime(e.target.value)}
-                className={inputClasses}
-              />
+                className={`${inputClasses} disabled:cursor-not-allowed disabled:bg-paper-muted disabled:text-ink-soft/60`}
+              >
+                <option value="">
+                  {!date
+                    ? "Vælg først en dato"
+                    : slotsLoading
+                      ? "Henter ledige tider..."
+                      : slots.length === 0
+                        ? "Ingen ledige tider"
+                        : "Vælg et tidspunkt"}
+                </option>
+                {slots.map((slot) => (
+                  <option key={slot} value={slot}>
+                    kl. {slot}
+                  </option>
+                ))}
+              </select>
+              {slotsMessage && (
+                <p className="text-xs text-amber-700">{slotsMessage}</p>
+              )}
+              {!slotsMessage && slots.length > 0 && chosenPackage && (
+                <p className="text-xs text-ink-soft">
+                  Sæt ca. {chosenPackage.duration.replace("Ca. ", "")} af.
+                </p>
+              )}
             </div>
           </div>
 
