@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { pricingPackages } from "@/config/pricing";
 import { scheduleConfig } from "@/config/schedule";
-import { bookingsOnDate } from "@/lib/bookingStore";
+import { bookingStoreEnabled, bookingsOnDate } from "@/lib/bookingStore";
 import {
   availableStartTimes,
   bookingDateRange,
@@ -70,5 +70,12 @@ export async function GET(request: Request) {
         : "Alle tider er optaget den dag. Prøv en anden dato.";
   }
 
-  return NextResponse.json({ ok: true, times, closed: false, message });
+  return NextResponse.json({
+    ok: true,
+    times,
+    closed: false,
+    message,
+    // Så du kan se udefra, om databasen med optagne tider er koblet på.
+    remembersBookings: bookingStoreEnabled,
+  });
 }

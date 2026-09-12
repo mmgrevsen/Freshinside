@@ -210,7 +210,7 @@ Booking-formularen viser kun de tidspunkter, der er ledige. For at den kan huske
 3. Klik **Connect** for at koble den til dit `freshinside`-projekt.
 4. Gå til **Deployments**, klik **⋯** ved den nyeste og vælg **Redeploy**.
 
-Vercel opretter selv de to nøgler, hjemmesiden leder efter (`KV_REST_API_URL` og `KV_REST_API_TOKEN`) – du skal ikke skrive noget ind manuelt.
+Vercel opretter selv de nøgler, hjemmesiden skal bruge – du skal ikke skrive noget ind manuelt. Bliver du undervejs spurgt om et **Custom Prefix**, kan du roligt lade feltet stå tomt; hjemmesiden finder selv nøglerne, uanset hvad de kommer til at hedde.
 
 **Sådan virker det bagefter:** Når nogen booker fredag kl. 15:00 til Fresh Deep, bliver 15:00–18:00 (plus en halv times pause) fjernet fra listen for de næste kunder. Booker en anden Fresh Clean lørdag kl. 12:00, forsvinder kun 12:00–13:30 den dag.
 

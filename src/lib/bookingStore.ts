@@ -12,11 +12,34 @@ import { hasConflict, minutesFromTime, type BookedInterval } from "@/lib/schedul
  * bliver modtaget som før, men to kunder KAN nå at vælge samme tid.
  */
 
-const REDIS_URL = process.env.KV_REST_API_URL;
-const REDIS_TOKEN = process.env.KV_REST_API_TOKEN;
+/**
+ * Finder databasens adresse og adgangskode blandt Vercels
+ * miljøvariabler. Vercel navngiver dem efter det "prefix", man vælger,
+ * når databasen kobles på (KV_..., STORAGE_..., UPSTASH_... osv.), så
+ * vi leder efter det par, der hører sammen, i stedet for at kræve ét
+ * bestemt navn. Så virker det, uanset hvad du valgte i Vercel.
+ */
+function findRedisCredentials(): { url: string; token: string } | null {
+  const env = process.env;
+  const URL_SUFFIX = "_REST_API_URL";
+  const TOKEN_SUFFIX = "_REST_API_TOKEN";
+
+  for (const key of Object.keys(env)) {
+    if (!key.endsWith(URL_SUFFIX)) continue;
+
+    const url = env[key];
+    const token = env[`${key.slice(0, -URL_SUFFIX.length)}${TOKEN_SUFFIX}`];
+
+    if (url && token) return { url, token };
+  }
+
+  return null;
+}
+
+const credentials = findRedisCredentials();
 
 /** Er den lille database sat op? */
-export const bookingStoreEnabled = Boolean(REDIS_URL && REDIS_TOKEN);
+export const bookingStoreEnabled = credentials !== null;
 
 /** Optagne tider slettes automatisk efter 90 dage – de er alligevel forbi. */
 const KEEP_SECONDS = 60 * 60 * 24 * 90;
@@ -28,10 +51,12 @@ function keyFor(isoDate: string) {
 }
 
 async function redis(command: (string | number)[]): Promise<unknown> {
-  const response = await fetch(REDIS_URL as string, {
+  if (!credentials) throw new Error("Databasen er ikke koblet på endnu.");
+
+  const response = await fetch(credentials.url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${REDIS_TOKEN}`,
+      Authorization: `Bearer ${credentials.token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(command),
