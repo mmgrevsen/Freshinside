@@ -57,7 +57,7 @@ export async function GET(request: Request) {
   }
 
   const booked = await bookingsOnDate(date);
-  const times = availableStartTimes(date, chosenPackage.blockMinutes, booked);
+  const times = availableStartTimes(date, chosenPackage.blockMinutes, booked ?? []);
 
   // Er der slet ingen tider tilbage, skyldes det enten for kort varsel
   // eller at dagen er booket op. Kunden skal have den rigtige besked.
@@ -76,6 +76,6 @@ export async function GET(request: Request) {
     closed: false,
     message,
     // Så du kan se udefra, om databasen med optagne tider er koblet på.
-    remembersBookings: bookingStoreEnabled,
+    remembersBookings: bookingStoreEnabled && booked !== null,
   });
 }

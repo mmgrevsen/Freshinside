@@ -133,7 +133,7 @@ async function verifyTimeSlot(booking: BookingRequest, chosenPackage: PricingPac
     return { ok: false as const, error: "Vælg venligst en dato og et tidspunkt." };
   }
 
-  const booked = await bookingsOnDate(booking.date);
+  const booked = (await bookingsOnDate(booking.date)) ?? [];
   const available = availableStartTimes(booking.date, chosenPackage.blockMinutes, booked);
 
   if (available.includes(booking.time)) return { ok: true as const };

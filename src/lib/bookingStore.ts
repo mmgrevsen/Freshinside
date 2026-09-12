@@ -74,9 +74,13 @@ async function redis(command: (string | number)[]): Promise<unknown> {
   return data.result;
 }
 
-/** Henter de tider, der allerede er booket på en dato. */
-export async function bookingsOnDate(isoDate: string): Promise<StoredBooking[]> {
-  if (!bookingStoreEnabled) return [];
+/**
+ * Henter de tider, der allerede er booket på en dato.
+ * Returnerer null, hvis databasen slet ikke kunne læses – så ved vi
+ * forskel på "der er ingen bookinger" og "vi kunne ikke se efter".
+ */
+export async function bookingsOnDate(isoDate: string): Promise<StoredBooking[] | null> {
+  if (!bookingStoreEnabled) return null;
 
   try {
     const raw = await redis(["GET", keyFor(isoDate)]);
@@ -96,7 +100,7 @@ export async function bookingsOnDate(isoDate: string): Promise<StoredBooking[]> 
     // Kan tiderne ikke hentes, siger vi hellere "ledig" end at afvise
     // en kunde, der gerne vil booke.
     console.error("Kunne ikke hente optagne tider:", error);
-    return [];
+    return null;
   }
 }
 
@@ -120,7 +124,7 @@ export async function reserveBooking(
   if (!bookingStoreEnabled) return { reserved: false, reason: "unavailable" };
 
   try {
-    const existing = await bookingsOnDate(isoDate);
+    const existing = (await bookingsOnDate(isoDate)) ?? [];
     const startMinutes = minutesFromTime(booking.start);
 
     if (hasConflict(startMinutes, workMinutes, existing)) {
