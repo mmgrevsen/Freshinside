@@ -21,16 +21,19 @@ import { hasConflict, minutesFromTime, type BookedInterval } from "@/lib/schedul
  */
 function findRedisCredentials(): { url: string; token: string } | null {
   const env = process.env;
-  const URL_SUFFIX = "_REST_API_URL";
-  const TOKEN_SUFFIX = "_REST_API_TOKEN";
 
+  // Vi leder efter to variabler, der hører sammen: en adresse, der
+  // slutter på _URL, og en adgangskode med præcis samme navn, bare med
+  // _TOKEN til sidst. Det passer på alle de navne, Vercel og Upstash
+  // bruger (KV_REST_API_URL, UPSTASH_REDIS_REST_URL, STORAGE_... osv.).
   for (const key of Object.keys(env)) {
-    if (!key.endsWith(URL_SUFFIX)) continue;
+    if (!key.endsWith("_URL")) continue;
 
     const url = env[key];
-    const token = env[`${key.slice(0, -URL_SUFFIX.length)}${TOKEN_SUFFIX}`];
+    if (!url?.startsWith("https://")) continue;
 
-    if (url && token) return { url, token };
+    const token = env[`${key.slice(0, -"_URL".length)}_TOKEN`];
+    if (token) return { url, token };
   }
 
   return null;
