@@ -18,7 +18,9 @@ export function Hero() {
       />
 
       <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-14 px-5 sm:px-8 lg:grid-cols-2 lg:gap-10">
-        <Reveal>
+        {/* Øverst på siden er der intet at scrolle til, så indholdet
+            glider på plads med det samme i stedet for at vente. */}
+        <Reveal immediate>
           <div className="flex flex-col items-start gap-6">
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700">
               <SparkleIcon className="h-4 w-4 animate-twinkle" />
@@ -46,7 +48,7 @@ export function Hero() {
           </div>
         </Reveal>
 
-        <Reveal delay={150}>
+        <Reveal immediate delay={120}>
           <div className="relative">
             <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-tr from-brand-100 to-brand-50" />
             <div className="relative overflow-hidden rounded-[1.75rem] border border-ink/5 bg-white shadow-2xl shadow-ink/10">

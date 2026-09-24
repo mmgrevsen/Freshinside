@@ -46,6 +46,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/**
+ * BEVÆGELSE
+ * ------------------------------------------------
+ * De samme tre "kurver" bruges overalt. Det er dem, der afgør, om en
+ * bevægelse føles billig eller dyr. En kurve beskriver, hvordan farten
+ * ændrer sig undervejs: noget skal starte hurtigt og lande blødt,
+ * andet må gerne vippe en anelse over målet, som en rigtig genstand.
+ *
+ * Vil du have alt til at føles hurtigere, sænker du --motion-normal.
+ */
+:root {
+  /* Starter kvikt, lander blødt. Til det meste. */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Vipper en anelse forbi målet. Til knapper og små ting. */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --motion-fast: 180ms;
+  --motion-normal: 520ms;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -114,17 +134,36 @@ section[id] {
   }
 }
 
-/* Langsomt drivende baggrundsfarver */
+/**
+ * Langsomt drivende baggrundsfarver.
+ * Kun forskydning, ingen skalering: de her flader er slørede, og et
+ * sløret billede skal tegnes helt forfra, hver gang det skifter
+ * størrelse. Det koster på en telefon. Flytter man det bare, kan
+ * grafikkortet genbruge billedet – derfor er den her version
+ * mærkbart lettere end en, der også zoomer.
+ */
 @keyframes drift {
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
   33% {
-    transform: translate(26px, -20px) scale(1.06);
+    transform: translate3d(28px, -22px, 0);
   }
   66% {
-    transform: translate(-20px, 16px) scale(0.95);
+    transform: translate3d(-22px, 18px, 0);
+  }
+}
+
+/* Indhold der glider op på plads, når siden åbnes */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -190,6 +229,28 @@ section[id] {
 }
 
 /**
+ * Indholdet øverst på siden venter ikke på, at man scroller – det
+ * glider på plads med det samme. Derfor føles siden levende, fra
+ * første øjeblik man ser den.
+ */
+.animate-enter {
+  animation: fade-up var(--motion-normal) var(--ease-soft) both;
+}
+
+/* Stiplet ring der drejer meget langsomt rundt om den valgte dag */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 14s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/**
  * MIKRO-INTERAKTIONER
  * ------------------------------------------------
  * Små effekter, når man holder musen over knapper og kort.
@@ -223,17 +284,37 @@ section[id] {
 /* Kort der løfter sig let, når musen er over dem */
 .card-lift {
   transition:
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s ease,
-    border-color 0.35s ease;
+    transform 0.4s var(--ease-soft),
+    box-shadow 0.4s var(--ease-soft),
+    border-color 0.4s ease;
 }
 
 .card-lift:hover {
-  transform: translateY(-6px);
+  transform: translate3d(0, -6px, 0);
   border-color: var(--color-brand-300);
   box-shadow:
-    0 18px 40px -18px rgb(11 18 32 / 0.25),
-    0 0 0 1px rgb(20 167 154 / 0.08);
+    0 22px 48px -20px rgb(11 18 32 / 0.28),
+    0 0 0 1px rgb(20 167 154 / 0.1);
+}
+
+/**
+ * Trykkes der på et kort (på mobil), sætter det sig et øjeblik.
+ * Det er den lille fysiske kvittering, der får en side til at føles
+ * som noget, man rører ved, frem for noget man kigger på.
+ */
+.card-lift:active {
+  transform: translate3d(0, -2px, 0) scale(0.995);
+  transition-duration: var(--motion-fast);
+}
+
+/**
+ * Fokus-ring til tastatur. Skal være tydelig nok til at man kan
+ * navigere uden mus, uden at skrige i designet.
+ */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

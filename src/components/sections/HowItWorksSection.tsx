@@ -2,9 +2,7 @@ import { howItWorksSteps } from "@/config/site";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
-import { CalendarIcon, CarIcon, SparkleIcon } from "@/components/ui/icons";
-
-const stepIcons = [CalendarIcon, CarIcon, SparkleIcon];
+import { stepScenes } from "@/components/ui/StepScenes";
 
 export function HowItWorksSection() {
   return (
@@ -36,13 +34,15 @@ export function HowItWorksSection() {
 
           <div className="relative grid grid-cols-1 gap-8 sm:grid-cols-3">
             {howItWorksSteps.map((step, index) => {
-              const Icon = stepIcons[index] ?? SparkleIcon;
+              const Scene = stepScenes[index] ?? stepScenes[0];
               return (
-                <Reveal key={step.title} delay={index * 150}>
-                  <div className="group flex flex-col items-center gap-4 text-center">
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-sm shadow-ink/5 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-brand-500/20">
-                      <Icon className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" />
-                      <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">
+                <Reveal key={step.title} delay={index * 110}>
+                  <div className="group flex flex-col items-center gap-5 text-center">
+                    {/* Tegningen sidder i sit eget felt, så de tre trin
+                        står som et sæt og ikke som løse billeder. */}
+                    <div className="card-lift relative w-full overflow-hidden rounded-2xl border border-ink/5 bg-white p-2 shadow-sm shadow-ink/5">
+                      <Scene className="h-auto w-full" />
+                      <span className="absolute left-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">
                         {index + 1}
                       </span>
                     </div>

@@ -35,7 +35,11 @@ export function Button<T extends ElementType = "button">({
   const Component = as || "button";
   return (
     <Component
-      className={`inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      // Trykket er kort og kontant (120 ms), mens slippet vipper blødt
+      // tilbage. Det er den forskel, der får en knap til at føles
+      // fysisk frem for at "skifte farve".
+      style={{ transitionTimingFunction: "var(--ease-spring)" }}
+      className={`inline-flex items-center justify-center gap-2 rounded-full font-medium transition-[transform,background-color,box-shadow,color,border-color] duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.97] active:duration-[120ms] ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       {...props}
     >
       {children}
