@@ -6,6 +6,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { StickyMobileBookButton } from "@/components/layout/StickyMobileBookButton";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
+import { CustomerChrome } from "@/components/layout/CustomerChrome";
+import { VisitTracker } from "@/components/layout/VisitTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,13 +72,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Spring til indhold
         </a>
-        <ScrollProgress />
-        <Navbar />
+        <VisitTracker />
+        <CustomerChrome>
+          <ScrollProgress />
+          <Navbar />
+        </CustomerChrome>
         <main id="hovedindhold" className="flex-1 pb-20 lg:pb-0">
           {children}
         </main>
-        <Footer />
-        <StickyMobileBookButton />
+        <CustomerChrome>
+          <Footer />
+          <StickyMobileBookButton />
+        </CustomerChrome>
       </body>
     </html>
   );

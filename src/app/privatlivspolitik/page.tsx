@@ -31,8 +31,32 @@ export default function PrivacyPolicyPage() {
             at kontakte dig om din booking.
           </p>
           <p>
+            Din booking gemmes i 180 dage, så {siteConfig.name} kan holde styr
+            på aftalerne, og slettes derefter automatisk.
+          </p>
+          <p>
             Oplysningerne videregives ikke til tredjepart og bruges ikke til
             markedsføring uden dit samtykke.
+          </p>
+          <h2 className="text-lg font-semibold text-ink">Besøg på hjemmesiden</h2>
+          <p>
+            Hjemmesiden tæller, hvor mange der besøger den. Der bruges hverken
+            cookies eller IP-adresser til det, og der gemmes ingenting, der kan
+            bruges til at genkende dig – hverken nu eller senere. Hver fane får
+            blot et tilfældigt tal, som forsvinder igen, når du lukker siden.
+          </p>
+          <p>
+            Det betyder, at {siteConfig.name} kan se, hvor mange der kigger på
+            hjemmesiden – men aldrig hvem. Derfor er der heller ingen
+            cookie-boks: der er ingen cookies at spørge om lov til.
+          </p>
+          <h2 className="text-lg font-semibold text-ink">Adresser og kort</h2>
+          <p>
+            Når du skriver din adresse, slås den op i Danmarks officielle
+            adresseregister (Dataforsyningen), og afstanden beregnes via den
+            åbne rutetjeneste BRouter. Vælger du at åbne kortet, hentes
+            korttegningerne fra OpenStreetMap. Disse tjenester modtager kun den
+            adresse eller det punkt, opslaget handler om.
           </p>
           <p>
             Har du spørgsmål til, hvordan dine oplysninger behandles, kan du

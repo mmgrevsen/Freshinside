@@ -214,12 +214,23 @@ export async function POST(request: Request) {
   }
 
   // Tiden markeres som optaget, så den forsvinder for de næste kunder.
+  // Hele bookingen gemmes, så du kan se den på /admin.
   const reservation = await reserveBooking(
     booking.date,
     {
       start: booking.time,
       end: timeFromMinutes(minutesFromTime(booking.time) + chosenPackage.blockMinutes),
       name: booking.name,
+      phone: booking.phone,
+      email: booking.email,
+      address: booking.address,
+      postalCode: booking.postalCode,
+      packageId: booking.packageId,
+      addOnIds: booking.addOnIds ?? [],
+      totalPrice: calculateTotal(booking),
+      message: booking.message?.trim() || "",
+      distanceKm,
+      createdAt: new Date().toISOString(),
     },
     chosenPackage.blockMinutes
   );

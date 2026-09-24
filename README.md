@@ -42,6 +42,7 @@ Al indhold, du med stor sandsynlighed vil ændre, ligger samlet i mappen **`src/
 | `src/config/addons.ts` | Ekstra services, kunden kan tilvælge under booking, og hvad de koster |
 | `src/config/quiz.ts` | Spørgsmålene i "Hvilken pakke passer til mig?"-quizzen |
 | `src/config/gallery.ts` | Hvilke billeder der bruges i hero-sektionen og før/efter-sektionen |
+| `src/lib/adminAuth.ts` | Forklarer login til din egen side (du skal ikke rette i den) |
 
 Hver fil har kommentarer øverst, der forklarer, hvad du kan ændre. Du skal blot rette teksten/tallet mellem anførselstegnene og gemme filen.
 
@@ -220,7 +221,55 @@ Vercel opretter selv de nøgler, hjemmesiden skal bruge – du skal ikke skrive 
 
 ---
 
-## 10. Om booking-systemet
+## 10. Din egen side (/admin)
+
+På **freshinside.dk/admin** kan du logge ind og se, hvad der sker: hvem der har booket, og hvor mange der kigger på hjemmesiden.
+
+### Sådan sætter du login op (én gang, ca. 2 minutter)
+
+1. Find på en **lang adgangskode** – gerne 20 tegn eller mere. Brug ikke den samme som til noget andet.
+2. Gå til [vercel.com](https://vercel.com) → dit projekt → **Settings → Environment Variables**
+3. Opret en variabel:
+   - Name: `ADMIN_PASSWORD`
+   - Value: din adgangskode
+4. Klik **Save**, gå til **Deployments**, klik **⋯** ved den nyeste og vælg **Redeploy**.
+
+Herefter kan du logge ind på `/admin`. Du forbliver logget ind i 14 dage ad gangen.
+
+> **Indtil du har gjort det, er siden lukket for alle – også dig.** Den står altså aldrig åben ved en fejl. Skifter du adgangskode senere, bliver du automatisk logget ud overalt.
+
+Siden er skjult for Google (`robots.txt`), og efter 8 forkerte gæt i træk er der lukket i et kvarter.
+
+### Hvad du kan se
+
+| | |
+|---|---|
+| **Inde lige nu** | Hvor mange der kigger på hjemmesiden i dette øjeblik |
+| **I dag** | Hvor mange forskellige personer der har været inde i dag |
+| **Sidevisninger** | Hvor mange gange siden er åbnet i dag |
+| **Sidste 7 dage** | En lille søjle pr. dag, så du kan se, hvornår folk kigger |
+| **Kommende bookinger** | Alle aftaler fremad, med navn, telefon, adresse og pris |
+| **Tidligere** | De sidste 30 dages aftaler |
+
+Klikker du på en booking, folder den sig ud: telefonnummeret kan ringes op direkte, adressen åbner i Google Maps, og du kan **aflyse tiden**, så den bliver ledig for andre igen.
+
+> Aflyser du, får kunden **ikke** automatisk besked. Ring eller skriv selv – nummeret står på bookingen.
+
+### Om de besøgende: hvor mange, aldrig hvem
+
+Du kan se **hvor mange** der kigger, men aldrig **hvem**. Det er et bevidst valg, og det er vigtigt:
+
+- Der gemmes **ingen IP-adresser**
+- Der sættes **ingen cookies**
+- Hver fane får kun et tilfældigt tal, som forsvinder, når fanen lukkes
+
+Derfor skal hjemmesiden **ikke** have sådan en irriterende cookie-boks – der er ingen cookies at spørge om lov til. Og du overholder automatisk GDPR, uden at skulle tænke over det.
+
+Skulle du senere ønske at vide mere om de besøgende (hvor de kommer fra, hvilken by osv.), kræver det en cookie-boks og en længere privatlivspolitik. Spørg mig, inden du gør det.
+
+---
+
+## 11. Om booking-systemet
 
 Sådan fungerer en booking i dag:
 
@@ -237,7 +286,7 @@ Der er **endnu ikke** en database, så bookinger gemmes ikke i en liste, du kan 
 
 ---
 
-## 11. Projektstruktur (kort overblik)
+## 12. Projektstruktur (kort overblik)
 
 ```
 src/
@@ -255,7 +304,7 @@ public/
 
 ---
 
-## 12. Teknologi
+## 13. Teknologi
 
 Hjemmesiden er bygget med:
 
