@@ -31,6 +31,10 @@ export function BookingRow({
   const [cancelling, setCancelling] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
+  const [note, setNote] = useState("");
+  const [message, setMessage] = useState(
+    `Jeg er desværre nødt til at aflyse din tid ${danishDate(booking.date)} kl. ${booking.start}.\n\nSkriv eller ring gerne, så finder vi et nyt tidspunkt. Beklager ulejligheden!`
+  );
 
   const chosenPackage = pricingPackages.find((pkg) => pkg.id === booking.packageId);
   const chosenAddOns = addOns.filter((addOn) => booking.addOnIds?.includes(addOn.id));
@@ -38,6 +42,7 @@ export function BookingRow({
   async function cancel() {
     setCancelling(true);
     setError("");
+    setNote("");
 
     try {
       const response = await fetch("/api/admin/cancel", {
@@ -47,6 +52,7 @@ export function BookingRow({
           date: booking.date,
           start: booking.start,
           createdAt: booking.createdAt,
+          message,
         }),
       });
 
@@ -55,7 +61,15 @@ export function BookingRow({
         throw new Error(data.error || "Kunne ikke aflyse.");
       }
 
-      router.refresh();
+      // Tiden er aflyst. Kom beskeden frem til kunden? Det skal du
+      // vide, så du kan ringe i stedet, hvis mailen ikke gik igennem.
+      if (data.emailed) {
+        router.refresh();
+      } else {
+        setNote(data.emailNote ?? "Tiden er aflyst, men kunden har ikke fået besked.");
+        setCancelling(false);
+        setConfirming(false);
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Kunne ikke aflyse.");
       setCancelling(false);
@@ -174,7 +188,13 @@ export function BookingRow({
             </p>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          {note && (
+            <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {note}
+            </p>
+          )}
+
+          <div className="mt-4">
             {!confirming ? (
               <button
                 type="button"
@@ -184,26 +204,42 @@ export function BookingRow({
                 Aflys denne tid
               </button>
             ) : (
-              <>
-                <span className="text-sm text-ink-soft">
-                  Sikker? Husk selv at give {booking.name.split(" ")[0]} besked.
-                </span>
-                <button
-                  type="button"
-                  onClick={cancel}
-                  disabled={cancelling}
-                  className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+              <div className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50/50 p-4">
+                <label
+                  htmlFor={`besked-${booking.date}-${booking.start}`}
+                  className="text-sm font-semibold text-ink"
                 >
-                  {cancelling ? "Aflyser..." : "Ja, aflys"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirming(false)}
-                  className="rounded-full px-4 py-2 text-sm font-medium text-ink-soft hover:text-ink"
-                >
-                  Fortryd
-                </button>
-              </>
+                  Besked til {booking.name.split(" ")[0]}
+                </label>
+                <p className="-mt-2 text-xs text-ink-soft">
+                  Den sendes som en mail til {booking.email ?? "kunden"}. Ret
+                  teksten, så den passer.
+                </p>
+                <textarea
+                  id={`besked-${booking.date}-${booking.start}`}
+                  rows={5}
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  className="w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-sm text-ink focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                />
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={cancel}
+                    disabled={cancelling}
+                    className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+                  >
+                    {cancelling ? "Aflyser..." : "Aflys og send beskeden"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirming(false)}
+                    className="rounded-full px-4 py-2 text-sm font-medium text-ink-soft hover:text-ink"
+                  >
+                    Fortryd
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

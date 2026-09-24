@@ -5,6 +5,7 @@ import { serviceAreaConfig } from "@/config/serviceArea";
 import { checkServiceAreaByText, measureDistanceToCustomer } from "@/lib/distance";
 import { addressById } from "@/lib/dawa";
 import { bookingsOnDate, reserveBooking } from "@/lib/bookingStore";
+import { sendEmail } from "@/lib/email";
 import {
   availableStartTimes,
   minutesFromTime,
@@ -81,50 +82,24 @@ function formatBookingEmail(booking: BookingRequest, distanceKm: number | null) 
     .join("\n");
 }
 
-async function sendNotificationEmail(booking: BookingRequest, distanceKm: number | null) {
-  const apiKey = process.env.RESEND_API_KEY;
-
-  if (!apiKey) {
-    console.log("Ny booking (e-mail ikke sat op endnu):", booking);
-    return;
-  }
-
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "FreshInside <onboarding@resend.dev>",
-      to: [BOOKING_EMAIL],
-      reply_to: booking.email,
-      subject: `Ny booking: ${booking.name} – ${booking.date} kl. ${booking.time}`,
-      text: formatBookingEmail(booking, distanceKm),
-    }),
-  });
-
-  if (!response.ok) {
-    console.error(
-      "Kunne ikke sende booking-mail:",
-      response.status,
-      await response.text()
-    );
-    console.log("Booking der ikke blev sendt på mail:", booking);
-  }
-}
-
 /**
- * Sender mailen, men lader ALDRIG en mailfejl vælte bookingen.
- * Kunden har udfyldt formularen og fået tiden reserveret – så skal
- * de ikke se en fejl, bare fordi mailtjenesten er nede.
+ * Sender dig mailen om den nye booking – men lader ALDRIG en mailfejl
+ * vælte bookingen. Kunden har udfyldt formularen og fået tiden
+ * reserveret, så de skal ikke se en fejl, bare fordi mailtjenesten
+ * er nede. Slår det fejl, ligger bookingen i loggen på Vercel.
  */
 async function notifyWithoutBreakingBooking(
   booking: BookingRequest,
   distanceKm: number | null
 ) {
   try {
-    await sendNotificationEmail(booking, distanceKm);
+    await sendEmail({
+      to: BOOKING_EMAIL,
+      // Svarer du på mailen, går svaret direkte til kunden.
+      replyTo: booking.email,
+      subject: `Ny booking: ${booking.name} – ${booking.date} kl. ${booking.time}`,
+      text: formatBookingEmail(booking, distanceKm),
+    });
   } catch (error) {
     console.error("Booking-mailen kunne ikke sendes:", error);
     console.log("Booking der ikke blev sendt på mail:", booking);

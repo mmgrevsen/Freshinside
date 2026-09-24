@@ -42,6 +42,7 @@ Al indhold, du med stor sandsynlighed vil ændre, ligger samlet i mappen **`src/
 | `src/config/addons.ts` | Ekstra services, kunden kan tilvælge under booking, og hvad de koster |
 | `src/config/quiz.ts` | Spørgsmålene i "Hvilken pakke passer til mig?"-quizzen |
 | `src/config/gallery.ts` | Hvilke billeder der bruges i hero-sektionen og før/efter-sektionen |
+| `src/config/email.ts` | Hvem mails bliver sendt fra (se afsnit 11) |
 | `src/lib/adminAuth.ts` | Forklarer login til din egen side (du skal ikke rette i den) |
 
 Hver fil har kommentarer øverst, der forklarer, hvad du kan ændre. Du skal blot rette teksten/tallet mellem anførselstegnene og gemme filen.
@@ -269,7 +270,55 @@ Skulle du senere ønske at vide mere om de besøgende (hvor de kommer fra, hvilk
 
 ---
 
-## 11. Om booking-systemet
+## 11. Skriv til kunderne (godkend dit domæne)
+
+Der er to slags mails, og de har hver sin forudsætning:
+
+| Mail | Kræver |
+|---|---|
+| **Til dig**, når nogen booker | Kun `RESEND_API_KEY` (afsnit 8) ✅ |
+| **Til kunden**, f.eks. når du aflyser | At freshinside.dk er godkendt hos Resend |
+
+Grunden er, at en gratis Resend-konto kun må sende til **din egen** adresse, så længe afsenderen er deres testadresse `onboarding@resend.dev`. Ellers kunne hvem som helst sende mails i andres navn.
+
+Det kan du se på **/admin** under Status:
+
+> ! **E-mail til kunderne** — Afsenderen er stadig Resends testadresse…
+
+### Sådan godkender du freshinside.dk
+
+1. Gå til [resend.com](https://resend.com) → **Domains** → **Add Domain**
+2. Skriv `freshinside.dk`
+3. Resend viser nogle DNS-records (typisk et par TXT og en MX)
+4. Læg dem ind hos [simply.com](https://simply.com) → freshinside.dk → **DNS** — præcis som du gjorde med A- og CNAME-recorden, da domænet blev sat op
+5. Klik **Verify** hos Resend. Det tager typisk 5–30 minutter
+6. Når der står **Verified**, retter du én linje i `src/config/email.ts`:
+
+```ts
+from: `${siteConfig.name} <booking@freshinside.dk>`,
+```
+
+7. Gem, og læg ændringen op:
+
+```bash
+git add .
+git commit -m "Send mails fra mit eget domæne"
+git push
+```
+
+Derefter skifter Status-linjen på /admin til grøn, og kunderne modtager dine beskeder.
+
+### Indtil da
+
+Aflyser du en tid, bliver den **altid** frigivet i kalenderen — også selvom mailen ikke kan sendes. Du får bare besked på skærmen:
+
+> Tiden er aflyst, MEN beskeden kunne ikke sendes … Ring til kunden på 20 30 40 50.
+
+Så ingen booking hænger fast, og du kan altid nå kunden på telefonen.
+
+---
+
+## 12. Om booking-systemet
 
 Sådan fungerer en booking i dag:
 
@@ -286,7 +335,7 @@ Der er **endnu ikke** en database, så bookinger gemmes ikke i en liste, du kan 
 
 ---
 
-## 12. Projektstruktur (kort overblik)
+## 13. Projektstruktur (kort overblik)
 
 ```
 src/
@@ -304,7 +353,7 @@ public/
 
 ---
 
-## 13. Teknologi
+## 14. Teknologi
 
 Hjemmesiden er bygget med:
 

@@ -10,10 +10,11 @@ import { bookingStoreEnabled, bookingsOnDates } from "@/lib/bookingStore";
 import { readVisitStats } from "@/lib/visits";
 import { addDays, nowInDenmark } from "@/lib/schedule";
 import { siteConfig } from "@/config/site";
-import { serviceAreaConfig } from "@/config/serviceArea";
+import { emailConfig } from "@/config/email";
 import { LoginForm } from "./LoginForm";
 import { LogoutButton } from "./LogoutButton";
 import { BookingRow } from "./BookingRow";
+import { TestEmailButton } from "./TestEmailButton";
 
 /**
  * DIN EGEN SIDE
@@ -201,11 +202,19 @@ export default async function AdminPage() {
           />
           <StatusLine
             ok={emailConfigured}
-            label="E-mail ved booking"
-            okText={`Du får en mail på ${serviceAreaConfig.outOfAreaEmail}`}
+            label="E-mail til dig ved booking"
+            okText={`Du får en mail på ${emailConfig.owner}`}
             failText="RESEND_API_KEY mangler på Vercel – derfor får du ingen mail. Se afsnit 8 i README."
           />
+          <StatusLine
+            ok={emailConfigured && emailConfig.canWriteToCustomers}
+            label="E-mail til kunderne"
+            okText="Du kan sende beskeder til kunderne, f.eks. når du aflyser"
+            failText="Afsenderen er stadig Resends testadresse, så der kan kun sendes til dig selv. Godkend freshinside.dk hos Resend – se afsnit 11 i README."
+          />
         </ul>
+
+        {emailConfigured && <TestEmailButton />}
 
         {/* Besøgstal */}
         <h2 className="mt-10 text-lg font-semibold text-ink">Besøgende</h2>

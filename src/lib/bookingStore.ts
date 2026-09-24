@@ -153,33 +153,36 @@ export async function reserveBooking(
 /**
  * Fjerner en booking igen – bruges, når du aflyser en tid på /admin.
  * Tiden bliver dermed ledig for andre kunder.
+ *
+ * Returnerer den slettede booking, så vi kan skrive til kunden
+ * bagefter – eller null, hvis der ikke var noget at slette.
  */
 export async function removeBooking(
   isoDate: string,
   start: string,
   createdAt?: string
-): Promise<boolean> {
-  if (!bookingStoreEnabled) return false;
+): Promise<StoredBooking | null> {
+  if (!bookingStoreEnabled) return null;
 
   try {
     const existing = (await bookingsOnDate(isoDate)) ?? [];
 
     // Er der to bookinger på samme starttidspunkt (bør ikke ske), bruger
     // vi createdAt til at ramme den rigtige.
-    let removed = false;
+    let removed: StoredBooking | null = null;
     const remaining = existing.filter((booking) => {
       if (removed) return true;
       const matches =
         booking.start === start &&
         (createdAt === undefined || booking.createdAt === createdAt);
       if (matches) {
-        removed = true;
+        removed = booking;
         return false;
       }
       return true;
     });
 
-    if (!removed) return false;
+    if (!removed) return null;
 
     if (remaining.length === 0) {
       await redis(["DEL", keyFor(isoDate)]);
@@ -193,9 +196,9 @@ export async function removeBooking(
       ]);
     }
 
-    return true;
+    return removed;
   } catch (error) {
     console.error("Kunne ikke slette bookingen:", error);
-    return false;
+    return null;
   }
 }
