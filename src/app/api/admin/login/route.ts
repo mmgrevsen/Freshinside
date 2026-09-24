@@ -2,7 +2,9 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import {
   adminLoginConfigured,
+  adminLoginState,
   createSessionValue,
+  minPasswordLength,
   passwordIsCorrect,
   sessionCookie,
 } from "@/lib/adminAuth";
@@ -70,7 +72,9 @@ export async function POST(request: Request) {
       {
         ok: false,
         error:
-          "Login er ikke sat op endnu. Opret ADMIN_PASSWORD på Vercel – se afsnit 10 i README.",
+          adminLoginState() === "too-short"
+            ? `ADMIN_PASSWORD er sat på Vercel, men koden skal være mindst ${minPasswordLength} tegn.`
+            : "Login er ikke sat op endnu. Opret ADMIN_PASSWORD på Vercel – se afsnit 10 i README.",
       },
       { status: 503 }
     );

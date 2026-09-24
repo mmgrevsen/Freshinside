@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
-import { adminLoginConfigured, isLoggedIn } from "@/lib/adminAuth";
+import {
+  adminLoginConfigured,
+  adminLoginState,
+  isLoggedIn,
+  minPasswordLength,
+} from "@/lib/adminAuth";
 import { bookingStoreEnabled, bookingsOnDates } from "@/lib/bookingStore";
 import { readVisitStats } from "@/lib/visits";
 import { addDays, nowInDenmark } from "@/lib/schedule";
@@ -115,12 +120,26 @@ export default async function AdminPage() {
             </>
           ) : (
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-              <p className="font-semibold">Login er ikke sat op endnu</p>
-              <p className="mt-2">
-                Opret en miljøvariabel ved navn <code>ADMIN_PASSWORD</code> på
-                Vercel (Settings → Environment Variables), og lav derefter en
-                Redeploy. Så kan du logge ind her.
-              </p>
+              {adminLoginState() === "too-short" ? (
+                <>
+                  <p className="font-semibold">Adgangskoden er for kort</p>
+                  <p className="mt-2">
+                    <code>ADMIN_PASSWORD</code> findes på Vercel, men koden skal
+                    være mindst {minPasswordLength} tegn. Ret den under Settings
+                    → Environment Variables, og lav en Redeploy bagefter.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold">Login er ikke sat op endnu</p>
+                  <p className="mt-2">
+                    Opret en miljøvariabel ved navn <code>ADMIN_PASSWORD</code> på
+                    Vercel (Settings → Environment Variables) med mindst{" "}
+                    {minPasswordLength} tegn, sæt flueben i{" "}
+                    <strong>Production</strong>, og lav derefter en Redeploy.
+                  </p>
+                </>
+              )}
               <p className="mt-2">
                 Indtil da er siden lukket for alle – også dig. Hele opskriften
                 står i afsnit 10 i README.

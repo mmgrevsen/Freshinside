@@ -23,12 +23,35 @@ const COOKIE_NAME = "freshinside_admin";
 /** Hvor længe du forbliver logget ind, før du skal skrive koden igen. */
 const SESSION_DAYS = 14;
 
+/** Mindste længde på adgangskoden. En kort kode er næsten som ingen kode. */
+const MIN_LENGTH = 8;
+
 function adminPassword(): string | null {
   const password = process.env.ADMIN_PASSWORD;
-  // En helt kort kode er næsten det samme som ingen kode.
-  if (!password || password.length < 8) return null;
+  if (!password || password.length < MIN_LENGTH) return null;
   return password;
 }
+
+export type AdminLoginState =
+  /** Klar til brug */
+  | "ready"
+  /** ADMIN_PASSWORD findes slet ikke */
+  | "missing"
+  /** ADMIN_PASSWORD findes, men koden er for kort */
+  | "too-short";
+
+/**
+ * Hvordan står det til med login? Vi skelner mellem "ikke oprettet" og
+ * "for kort kode", så beskeden på skærmen siger, hvad der faktisk er galt.
+ */
+export function adminLoginState(): AdminLoginState {
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) return "missing";
+  if (password.length < MIN_LENGTH) return "too-short";
+  return "ready";
+}
+
+export const minPasswordLength = MIN_LENGTH;
 
 /** Er login overhovedet sat op? */
 export function adminLoginConfigured(): boolean {
