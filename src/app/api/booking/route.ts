@@ -115,6 +115,23 @@ async function sendNotificationEmail(booking: BookingRequest, distanceKm: number
 }
 
 /**
+ * Sender mailen, men lader ALDRIG en mailfejl vælte bookingen.
+ * Kunden har udfyldt formularen og fået tiden reserveret – så skal
+ * de ikke se en fejl, bare fordi mailtjenesten er nede.
+ */
+async function notifyWithoutBreakingBooking(
+  booking: BookingRequest,
+  distanceKm: number | null
+) {
+  try {
+    await sendNotificationEmail(booking, distanceKm);
+  } catch (error) {
+    console.error("Booking-mailen kunne ikke sendes:", error);
+    console.log("Booking der ikke blev sendt på mail:", booking);
+  }
+}
+
+/**
  * Slår den valgte adresse op og måler afstanden hjem til dig.
  * Falder tilbage til et tekstopslag, hvis id'et ikke kan bruges.
  */
@@ -245,7 +262,7 @@ export async function POST(request: Request) {
     );
   }
 
-  await sendNotificationEmail(booking, distanceKm);
+  await notifyWithoutBreakingBooking(booking, distanceKm);
 
   return NextResponse.json({ ok: true });
 }

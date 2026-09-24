@@ -5,6 +5,7 @@ import { bookingStoreEnabled, bookingsOnDates } from "@/lib/bookingStore";
 import { readVisitStats } from "@/lib/visits";
 import { addDays, nowInDenmark } from "@/lib/schedule";
 import { siteConfig } from "@/config/site";
+import { serviceAreaConfig } from "@/config/serviceArea";
 import { LoginForm } from "./LoginForm";
 import { LogoutButton } from "./LogoutButton";
 import { BookingRow } from "./BookingRow";
@@ -32,6 +33,47 @@ export const dynamic = "force-dynamic";
 /** Hvor langt tilbage og frem vi henter bookinger. */
 const DAYS_BACK = 30;
 const DAYS_AHEAD = 90;
+
+/**
+ * Er e-mail-tjenesten sat op? Vi kigger kun efter, OM nøglen findes –
+ * selve nøglen forlader aldrig serveren.
+ */
+const emailConfigured = Boolean(process.env.RESEND_API_KEY);
+
+function StatusLine({
+  ok,
+  label,
+  okText,
+  failText,
+}: {
+  ok: boolean;
+  label: string;
+  okText: string;
+  failText: string;
+}) {
+  return (
+    <li
+      className={`flex items-start gap-3 rounded-2xl border p-4 text-sm ${
+        ok ? "border-ink/10 bg-white" : "border-amber-200 bg-amber-50"
+      }`}
+    >
+      <span
+        className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${
+          ok ? "bg-brand-500" : "bg-amber-500"
+        }`}
+        aria-hidden
+      >
+        {ok ? "✓" : "!"}
+      </span>
+      <span>
+        <span className="font-semibold text-ink">{label}</span>
+        <span className={`block ${ok ? "text-ink-soft" : "text-amber-900"}`}>
+          {ok ? okText : failText}
+        </span>
+      </span>
+    </li>
+  );
+}
 
 function Card({
   label,
@@ -129,15 +171,22 @@ export default async function AdminPage() {
           <LogoutButton />
         </div>
 
-        {!bookingStoreEnabled && (
-          <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-            <p className="font-semibold">Databasen er ikke koblet på</p>
-            <p className="mt-2">
-              Uden den kan hjemmesiden ikke huske bookinger eller besøgstal.
-              Se afsnit 9 i README.
-            </p>
-          </div>
-        )}
+        {/* Status: virker de ting, der skal sættes op på Vercel? */}
+        <h2 className="mt-10 text-lg font-semibold text-ink">Status</h2>
+        <ul className="mt-3 flex flex-col gap-2">
+          <StatusLine
+            ok={bookingStoreEnabled}
+            label="Database"
+            okText="Bookinger og besøgstal bliver husket"
+            failText="Ikke koblet på – bookinger kan ikke vises her. Se afsnit 9 i README."
+          />
+          <StatusLine
+            ok={emailConfigured}
+            label="E-mail ved booking"
+            okText={`Du får en mail på ${serviceAreaConfig.outOfAreaEmail}`}
+            failText="RESEND_API_KEY mangler på Vercel – derfor får du ingen mail. Se afsnit 8 i README."
+          />
+        </ul>
 
         {/* Besøgstal */}
         <h2 className="mt-10 text-lg font-semibold text-ink">Besøgende</h2>
