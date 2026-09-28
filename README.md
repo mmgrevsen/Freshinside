@@ -170,6 +170,24 @@ git commit -m "Beskriv kort, hvad du har ændret"
 git push
 ```
 
+### Hvis `git` siger "command not found" eller beder om Xcode
+
+`git` følger med Apples udviklerværktøjer, og de forsvandt under en macOS-opdatering på denne Mac. Den rigtige løsning er at installere dem igen:
+
+```bash
+xcode-select --install
+```
+
+Der popper et vindue op, som beder om en administrator-adgangskode. Den har du ikke på denne Mac (den tilhører Simon), så du skal have ham til at trykke ja. Det tager et par minutter og skal kun gøres én gang.
+
+**Indtil da** kan du bruge nødløsningen `gem-og-send.mjs`, som ligger i projektet. Den gør præcis det samme som de tre kommandoer ovenfor, men med en git skrevet i JavaScript:
+
+```bash
+node gem-og-send.mjs "Beskriv kort, hvad du har ændret"
+```
+
+Når Simon har installeret værktøjerne, kan filen slettes.
+
 ---
 
 ## 7. Sådan publicerer du hjemmesiden (Vercel)
