@@ -1,7 +1,11 @@
 import { Hero } from "@/components/sections/Hero";
 import { TrustBar } from "@/components/sections/TrustBar";
 import { PricingSection } from "@/components/sections/PricingSection";
-import { PackageQuiz } from "@/components/sections/PackageQuiz";
+// Quizzen "Hvilken pakke passer til mig?" er slået fra, fordi der kun
+// er ÉN pakke – så er der ikke noget at vælge imellem. Får du flere
+// pakker igen (src/config/pricing.ts), fjerner du bare de to skråstreger
+// her og på <PackageQuiz /> længere nede.
+// import { PackageQuiz } from "@/components/sections/PackageQuiz";
 import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { AreaSection } from "@/components/sections/AreaSection";
@@ -21,7 +25,7 @@ export default function Home() {
       <Hero />
       <TrustBar />
       <PricingSection />
-      <PackageQuiz />
+      {/* <PackageQuiz /> */}
       <HowItWorksSection />
       <BeforeAfterSection />
       <AboutSection />

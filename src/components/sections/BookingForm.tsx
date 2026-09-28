@@ -56,7 +56,11 @@ const openDaysText = (() => {
 
 export function BookingForm() {
   const [step, setStep] = useState(0);
-  const [packageId, setPackageId] = useState("");
+  // Er der kun ÉN pakke, er der intet at vælge imellem – så er den
+  // valgt på forhånd, og kunden slipper for et unødigt klik.
+  const [packageId, setPackageId] = useState(
+    pricingPackages.length === 1 ? pricingPackages[0].id : ""
+  );
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -359,24 +363,32 @@ export function BookingForm() {
       {step === 0 && (
         <div className="flex flex-col gap-6">
           <fieldset className="flex flex-col gap-3">
-            <legend className={`${labelClasses} mb-2`}>Vælg din pakke</legend>
+            <legend className={`${labelClasses} mb-2`}>
+              {pricingPackages.length === 1 ? "Det her får du" : "Vælg din pakke"}
+            </legend>
             {pricingPackages.map((pkg) => (
               <label
                 key={pkg.id}
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
+                className={`flex items-start gap-3 rounded-xl border p-4 transition-colors ${
+                  pricingPackages.length > 1 ? "cursor-pointer" : ""
+                } ${
                   packageId === pkg.id
                     ? "border-brand-500 bg-brand-50"
                     : "border-ink/10 bg-white hover:border-brand-300"
                 }`}
               >
-                <input
-                  type="radio"
-                  name="package"
-                  value={pkg.id}
-                  checked={packageId === pkg.id}
-                  onChange={() => setPackageId(pkg.id)}
-                  className="mt-1 h-4 w-4 accent-brand-600"
-                />
+                {/* Med kun én pakke er der intet at vælge imellem, så
+                    knappen ville bare være i vejen. */}
+                {pricingPackages.length > 1 && (
+                  <input
+                    type="radio"
+                    name="package"
+                    value={pkg.id}
+                    checked={packageId === pkg.id}
+                    onChange={() => setPackageId(pkg.id)}
+                    className="mt-1 h-4 w-4 accent-brand-600"
+                  />
+                )}
                 <span className="flex-1">
                   <span className="flex items-baseline justify-between gap-3">
                     <span className="font-semibold text-ink">{pkg.name}</span>

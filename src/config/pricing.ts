@@ -5,11 +5,15 @@
  * hvad der er inkluderet. Ret trygt i tal og tekster herunder – resten
  * af hjemmesiden opdateres automatisk.
  *
- * "popular: true" sætter mærkatet "Mest populær" på en pakke.
- * Der må kun være ÉN pakke med popular: true ad gangen.
+ * Der er ÉN pakke lige nu. Vil du have flere igen, kopierer du hele
+ * blokken { ... } og retter id, navn, pris, tid og punkter.
  *
- * Vil du tilføje en tredje pakke igen, kopierer du blot en hel blok
- * { ... } og retter id, navn, pris og punkter.
+ * Har du flere pakker, kan du sætte "popular: true" på én af dem for
+ * at give den mærkatet "Mest populær". Med kun én pakke giver det
+ * ingen mening, så den er taget af.
+ *
+ * HUSK: "blockMinutes" styrer, hvor lang tid pakken optager i
+ * kalenderen. Retter du tiden, så ret også den.
  */
 
 export type PricingPackage = {
@@ -39,7 +43,7 @@ export const pricingPackages: PricingPackage[] = [
     priceSuffix: "kr.",
     duration: "Ca. 1–1,5 time",
     blockMinutes: 90,
-    description: "Grundig rengøring af hele kabinen – den mest valgte pakke.",
+    description: "Grundig rengøring af hele kabinen indvendigt.",
     features: [
       "Grundig støvsugning",
       "Rengøring af måtter",
@@ -48,25 +52,6 @@ export const pricingPackages: PricingPackage[] = [
       "Kopholdere og dørpaneler",
       "Tømning af affald",
       "Bagagerum",
-    ],
-    popular: true,
-    ctaLabel: "Vælg denne pakke",
-  },
-  {
-    id: "fresh-deep",
-    name: "Fresh Deep",
-    price: 319,
-    priceSuffix: "kr.",
-    duration: "Ca. 2–3 timer",
-    blockMinutes: 180,
-    description: "Den grundige totalrengøring til bilen, der fortjener ekstra fokus.",
-    features: [
-      "Alt fra Fresh Clean",
-      "Ekstra grundig støvsugning",
-      "Rengøring mellem sæder",
-      "Grundigere rengøring af overflader",
-      "Pletbehandling efter behov",
-      "Ekstra fokus på detaljer",
     ],
     ctaLabel: "Vælg denne pakke",
   },

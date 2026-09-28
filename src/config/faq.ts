@@ -8,7 +8,7 @@ export const faqItems = [
   {
     question: "Hvor lang tid tager en rengøring?",
     answer:
-      "Det afhænger af pakken og bilens stand. Fresh Clean tager typisk 1–1,5 time, mens Fresh Deep kan tage 1,5–2 timer.",
+      "Det afhænger af bilens stand. Regn med 1–1,5 time. Er bilen ekstra beskidt, siger jeg til, inden jeg går i gang.",
   },
   {
     question: "Skal jeg selv flytte bilen?",
@@ -28,7 +28,7 @@ export const faqItems = [
   {
     question: "Kan I fjerne pletter?",
     answer:
-      "Almindelige pletter og mindre snavs klares som en del af Fresh Clean og Fresh Deep. Ved meget hårdnakkede pletter aftales det konkret, inden vi går i gang.",
+      "Almindeligt snavs og lette pletter tager jeg med. Hårdnakkede pletter kræver særlige midler, som jeg ikke har endnu – så dem kan jeg desværre ikke love noget om.",
   },
   {
     question: "Hvad hvis bilen er meget beskidt?",

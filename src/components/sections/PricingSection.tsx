@@ -23,8 +23,12 @@ export function PricingSection() {
         <Reveal>
           <SectionHeading
             eyebrow="Priser"
-            title="Find den pakke, der passer til din bil"
-            description={`${count === 2 ? "To" : "Tre"} enkle pakker – vælg den, der matcher, hvor grundig en rengøring bilen har brug for.`}
+            title={count === 1 ? "Én pris, ingen overraskelser" : "Find den pakke, der passer til din bil"}
+            description={
+              count === 1
+                ? "Samme grundige rengøring hver gang. Du ved præcis, hvad det koster, før jeg kommer."
+                : `${count === 2 ? "To" : "Tre"} enkle pakker – vælg den, der matcher, hvor grundig en rengøring bilen har brug for.`
+            }
           />
         </Reveal>
 
