@@ -12,7 +12,7 @@ import { ContactSection } from "@/components/sections/ContactSection";
 // Før & efter-sektionen er midlertidigt slået fra, indtil der er rigtige
 // billeder. Komponenten ligger stadig i src/components/sections/ og kan
 // sættes tilbage ind herunder, når billederne er klar:
-// import { BeforeAfterSection } from "@/components/sections/BeforeAfterSection";
+import { BeforeAfterSection } from "@/components/sections/BeforeAfterSection";
 // import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 
 export default function Home() {
@@ -23,6 +23,7 @@ export default function Home() {
       <PricingSection />
       <PackageQuiz />
       <HowItWorksSection />
+      <BeforeAfterSection />
       <AboutSection />
       <AreaSection />
       <FAQSection />

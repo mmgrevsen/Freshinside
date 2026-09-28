@@ -51,10 +51,7 @@ export const navLinks = [
   { label: "Forside", href: "#forside" },
   { label: "Priser", href: "#priser" },
   { label: "Sådan fungerer det", href: "#saadan-fungerer-det" },
-  // "Før & efter" er midlertidigt fjernet fra menuen, fordi sektionen er
-  // slået fra i src/app/page.tsx (se kommentaren der). Sæt linjen herunder
-  // tilbage ind, når sektionen vises igen:
-  // { label: "Før & efter", href: "#foer-efter" },
+  { label: "Før & efter", href: "#foer-efter" },
   { label: "Om FreshInside", href: "#om-os" },
   { label: "FAQ", href: "#faq" },
   { label: "Kontakt", href: "#kontakt" },
