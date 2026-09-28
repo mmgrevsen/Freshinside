@@ -396,6 +396,10 @@ export function BookingForm() {
             ))}
           </fieldset>
 
+          {/* Er der ingen tilvalg i src/config/addons.ts, bliver hele
+              afsnittet slet ikke bygget. Så står der ikke en tom
+              overskrift, og kunden ser kun pakkerne. */}
+          {addOns.length > 0 && (
           <fieldset className="flex flex-col gap-3">
             <legend className={`${labelClasses} mb-2`}>
               Ekstra services{" "}
@@ -430,6 +434,7 @@ export function BookingForm() {
               </label>
             ))}
           </fieldset>
+          )}
         </div>
       )}
 

@@ -28,16 +28,12 @@ export function PackageQuiz() {
       : quizConfig.lightPackageId;
   const recommended = pricingPackages.find((pkg) => pkg.id === recommendedId);
 
-  const suggestedAddOnIds = Array.from(
-    new Set(
-      answers
-        .map((answer) => answer.suggestsAddOn)
-        .filter((id): id is string => Boolean(id))
-    )
-  );
+  // Quizzen kan foreslå tilvalg, men kun dem der faktisk kan bestilles.
+  // Er tilvalgene slået fra i src/config/addons.ts, foreslås ingenting.
   const suggestedAddOns = addOns.filter((addOn) =>
-    suggestedAddOnIds.includes(addOn.id)
+    answers.some((answer) => answer.suggestsAddOn === addOn.id)
   );
+  const suggestedAddOnIds = suggestedAddOns.map((addOn) => addOn.id);
 
   function saveChoiceAndBook() {
     selectForBooking({ packageId: recommendedId, addOnIds: suggestedAddOnIds });

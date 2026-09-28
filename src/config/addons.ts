@@ -1,13 +1,20 @@
 /**
- * EKSTRA SERVICES (ADD-ONS)
+ * EKSTRA SERVICES (TILVALG)
  * ------------------------------------------------
- * Kunden kan vælge disse til under booking. Det holder pris-siden
- * simpel, i stedet for at lave mange forskellige pakker.
+ * ⛔ SLÅET FRA LIGE NU.
  *
- * ⚠️ PRISERNE HERUNDER ER FORESLÅEDE STARTPRISER – ret dem, så de
- * passer til, hvad arbejdet reelt tager dig af tid.
+ * Tilvalgene er taget af siden, indtil du har værktøjet til dem
+ * (pletfjerner, lugtbehandling osv.). Man skal ikke kunne bestille
+ * noget, man ikke kan levere – og prisen skal være din, ikke et gæt.
  *
- * Vil du fjerne en ekstra service, sletter du bare hele blokken { ... }.
+ * SÅDAN TÆNDER DU DEM IGEN:
+ * 1. Flyt de blokke, du vil bruge, fra "paaVej" ned i "addOns"
+ * 2. Ret prisen, så den passer til, hvad arbejdet tager dig af tid
+ * 3. Gem filen
+ *
+ * Resten af hjemmesiden retter sig automatisk: er listen tom, findes
+ * hele "Ekstra services"-afsnittet slet ikke i booking-formularen.
+ * Lægger du noget i den, dukker det op af sig selv.
  */
 
 export type AddOn = {
@@ -17,7 +24,16 @@ export type AddOn = {
   price: number;
 };
 
-export const addOns: AddOn[] = [
+/** Det kunden kan vælge til lige nu. Tom = afsnittet vises ikke. */
+export const addOns: AddOn[] = [];
+
+/**
+ * PARKERET TIL SENERE
+ * ------------------------------------------------
+ * Beskrivelserne er klar. PRISERNE ER GÆT og skal rettes, før de
+ * bruges – flyt blokken op i "addOns" ovenfor, når du er klar.
+ */
+export const paaVej: AddOn[] = [
   {
     id: "dyrehaar",
     name: "Fjernelse af dyrehår",
